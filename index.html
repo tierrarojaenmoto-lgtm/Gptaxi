@@ -1,0 +1,240 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Mototaxi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0E3B2E">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<style>
+:root{--bg:#F6F3E8;--ink:#10261E;--g:#0E3B2E;--y:#F2B705;--line:#D9D3BF}
+@media(prefers-color-scheme:dark){:root{--bg:#10261E;--ink:#F6F3E8;--line:#2A4A3E}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:26px;margin:0 0 12px}h2{font-size:19px;margin:22px 0 0}p.s{margin:8px 0;opacity:.7}
+.tabs,.seg,.row{display:flex;gap:8px}.row>div{flex:1}
+.tabs button,.seg button{margin:8px 0 0;background:transparent;border:2px solid var(--line);color:inherit;padding:11px}
+.tabs button[aria-selected=true],.seg button[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}
+label{display:block;font-weight:700;margin:12px 0 4px}
+input{width:100%;padding:13px;border:2px solid var(--line);border-radius:10px;background:transparent;color:inherit;font:inherit}
+input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--y);outline-offset:1px}
+button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:10px;background:var(--y);color:#10261E;font:700 17px "Trebuchet MS",system-ui,sans-serif;cursor:pointer}
+button.o{background:transparent;border:2px solid var(--line);color:inherit;margin-top:10px}
+#map{height:260px;border-radius:10px;border:2px solid var(--line);margin-top:10px}
+.c{border:2px solid var(--line);border-radius:10px;padding:14px;margin-top:12px}
+.c b{display:block;font-size:18px}.st{display:inline-block;background:var(--g);color:#fff;padding:3px 10px;border-radius:99px;font-size:14px;margin-bottom:8px}
+.price{font-size:28px!important;margin:6px 0}
+.c a{color:inherit;font-weight:700}.err{color:#c0392b;margin-top:10px}[hidden]{display:none!important}
+.moto{font-size:28px;line-height:1}
+.rt{display:flex;gap:6px}.rt button{margin:8px 0 0;padding:10px 4px;background:transparent;border:2px solid var(--line);color:inherit}
+</style></head><body><main>
+<h1>Mototaxi</h1>
+<button id="inst" hidden style="margin:0 0 12px">📲 Instalar la app en tu celular</button>
+<div class="tabs" role="tablist"><button id="tcli" role="tab" aria-selected="true" onclick="tab('cli')">Soy cliente</button><button id="tcho" role="tab" aria-selected="false" onclick="tab('cho')">Soy chofer</button></div>
+
+<section id="cli">
+<div id="form">
+<label for="n">Tu nombre</label><input id="n" autocomplete="name">
+<label for="p">Referencia de recogida (opcional)</label><input id="p" placeholder="Ej: Plaza central">
+<label for="d">Destino (opcional)</label><input id="d" placeholder="Ej: Hospital">
+<button id="gps" onclick="miUbic()" style="font-size:19px;padding:18px">📍 Enviar mi ubicación exacta</button>
+<p class="s" id="gpsok">Encendé el GPS del celular y tocá el botón. Así el chofer te encuentra justo donde estás.</p>
+<p class="s"><b>Después tocá en el mapa a dónde querés ir</b> (aparece una bandera 🏁).</p>
+<div class="seg"><button id="mp" aria-pressed="false" onclick="setMode('p')">Cambiar recogida en el mapa</button><button id="md" aria-pressed="true" onclick="setMode('d')">Marcar destino</button></div>
+<button id="go" onclick="pedir()">Pedir mototaxi</button>
+</div>
+<div id="ride"></div><div class="err" id="e"></div>
+<h2>Motos disponibles</h2><div id="avail"></div>
+<div id="map"></div>
+</section>
+
+<section id="cho" hidden>
+<div id="login" hidden>
+<p class="s">Ingresá con tu cuenta de chofer.</p>
+<label for="em">Correo</label><input id="em" type="email" autocomplete="email">
+<label for="pw">Contraseña (mínimo 6 caracteres)</label><input id="pw" type="password" autocomplete="current-password">
+<div id="reg" hidden><label for="rn">Tu nombre</label><input id="rn" autocomplete="name"><label for="rm">Modelo de tu moto</label><input id="rm" placeholder="Ej: Honda Wave 110"></div>
+<button onclick="entrar()">Entrar</button><button class="o" onclick="registro()">Crear cuenta de chofer</button>
+</div>
+<div id="wait" hidden><div class="c"><b>Membresía no activa</b><span>Tu cuenta está registrada pero todavía no fue activada. Contactá al administrador para abonar la membresía.</span></div></div>
+<div id="admin" hidden><h2>Administrador: choferes</h2><div id="dl"></div></div>
+<button class="o" id="out" onclick="salir()" hidden>Cerrar sesión</button>
+<div id="dapp" hidden>
+<label for="cn">Tu nombre</label><input id="cn" readonly>
+<label for="cm">Modelo de tu moto</label><input id="cm" placeholder="Ej: Honda Wave 110">
+<label style="display:flex;gap:8px;align-items:center"><input id="av" type="checkbox" style="width:auto"> Estoy disponible (los clientes me ven y suena el aviso)</label>
+<button class="o" onclick="unlock();beep()">Probar sonido de aviso</button>
+<h2>Mis tarifas (ejemplo, editalas)</h2>
+<div class="row"><div><label for="tb">Base ($)</label><input id="tb" type="number" inputmode="numeric" min="0"></div>
+<div><label for="tk">Por km ($)</label><input id="tk" type="number" inputmode="numeric" min="0"></div></div>
+<p class="s">Precio = base + km × tarifa por km. Podés ajustarlo en cada pedido antes de enviarlo.</p>
+<h2>Lo recaudado</h2><div id="tot"></div>
+<h2>Mis viajes</h2><div id="mine"></div>
+<h2>Pedidos nuevos</h2><div id="new"></div>
+<h2>Historial</h2><div id="hist"></div><button class="o" onclick="borrarHist()">Borrar historial</button>
+</div>
+<div class="err" id="e2"></div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const db=supabase.createClient("https://vffcjijwrgerdyujvlcf.supabase.co","sb_publishable_rv-VVSkeii8-_0pfS-EZCw_d2XkD1-Q");
+const $=i=>document.getElementById(i);
+const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
+const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
+const money=n=>"$"+Number(n).toLocaleString("es-AR");
+let AC=null;function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}}
+document.addEventListener("click",unlock);
+function beep(n=3,f=880){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}if(!AC)return;for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.3;o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}}
+const T={pendiente:"Esperando tarifa del chofer…",cotizado:"Un chofer te envió su tarifa",aceptado:"Tarifa aceptada, esperando que el chofer salga",en_camino:"El chofer va en camino a buscarte",en_viaje:"Viaje en curso",finalizado:"Viaje finalizado",cancelado:"Viaje cancelado"};
+const LIVE=["pendiente","cotizado","aceptado","en_camino","en_viaje"];
+function tab(w){for(const k of["cli","cho"]){$(k).hidden=k!==w;$("t"+k).setAttribute("aria-selected",k===w)}if(w==="cli")setTimeout(()=>map.invalidateSize(),50);else sesion()}
+
+/* ---------- CLIENTE ---------- */
+const map=L.map("map").setView([-25.97,-54.57],14);
+L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
+let pin=null,dpin=null,moto=null,pick=null,dest=null,ride=null,mode="d",gps=false,acc=null;
+const icon=h=>L.divIcon({className:"moto",html:h,iconSize:[30,30]});
+function setMode(m){mode=m;$("mp").setAttribute("aria-pressed",m==="p");$("md").setAttribute("aria-pressed",m==="d")}
+map.on("click",e=>mode==="p"?(gps=false,acc=null,setPickup(e.latlng)):setDest(e.latlng));
+function setPickup(ll){pick=ll;if(pin)pin.setLatLng(ll);else pin=L.marker(ll).addTo(map);setMode("d")}
+function setDest(ll){dest=ll;if(dpin)dpin.setLatLng(ll);else dpin=L.marker(ll,{icon:icon("🏁")}).addTo(map)}
+function miUbic(){$("e").textContent="";const g=$("gpsok");
+if(!navigator.geolocation)return $("e").textContent="Tu navegador no permite ubicación. Tocá el mapa para marcar dónde estás.";
+g.textContent="Buscando tu ubicación…";
+navigator.geolocation.getCurrentPosition(p=>{const ll={lat:p.coords.latitude,lng:p.coords.longitude};acc=Math.round(p.coords.accuracy);gps=true;map.setView(ll,16);setPickup(ll);
+g.textContent="✅ Ubicación enviada (precisión ±"+acc+" m). Ahora tocá en el mapa a dónde vas."},
+()=>{g.textContent="";$("e").textContent="No se pudo obtener tu ubicación. Activá el GPS y permití la ubicación, o cambiá la recogida en el mapa."},{enableHighAccuracy:true,timeout:15000,maximumAge:0})}
+const hav=(a,b)=>{const r=x=>x*Math.PI/180,h=Math.sin(r(b.lat-a.lat)/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(r(b.lng-a.lng)/2)**2;return 12742*Math.asin(Math.sqrt(h))};
+async function km(a,b){try{const c=new AbortController();setTimeout(()=>c.abort(),4000);
+const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`,{signal:c.signal});
+return (await r.json()).routes[0].distance/1000}catch(e){return hav(a,b)*1.3}}
+try{ride=JSON.parse(store.get("ride"));$("n").value=store.get("nombre")||""}catch(e){}
+async function pedir(){$("e").textContent="";
+if(!pick||!dest)return $("e").textContent=pick?"Tocá en el mapa a dónde querés ir.":"Primero tocá el botón 📍 Enviar mi ubicación exacta.";
+$("go").disabled=true;$("go").textContent="Calculando distancia…";
+const d=Math.round(await km(pick,dest)*10)/10,n=$("n").value.trim();
+const row={client_name:n,pickup:$("p").value.trim()||"Punto en el mapa",dropoff:$("d").value.trim()||"Destino en el mapa",pickup_lat:pick.lat,pickup_lng:pick.lng,pickup_exact:gps,pickup_accuracy:acc,dropoff_lat:dest.lat,dropoff_lng:dest.lng,distance_km:d};
+const {data,error}=await db.from("rides").insert(row).select().single();
+$("go").disabled=false;$("go").textContent="Pedir mototaxi";
+if(error)return $("e").textContent="No se pudo pedir: "+error.message;
+ride=data;store.set("ride",JSON.stringify(data));store.set("nombre",n);renderC()}
+async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.id);if(onlyStatus)q=q.eq("status",onlyStatus);await q;refreshC()}
+const aceptar=()=>upd({status:"aceptado"},"cotizado");
+const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null},"cotizado");
+const cancelar=()=>upd({status:"cancelado"});
+async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if(data.status!==ride.status){if(data.status==="cotizado")beep(2,660);if(data.status==="en_camino")beep(3,988)}ride=data;renderC()}}
+function renderC(){const r=ride,live=r&&LIVE.includes(r.status);
+$("form").hidden=!!live;
+if(!r){$("ride").replaceChildren();return}
+const c=el("div","c");c.append(el("span","st",T[r.status]),el("b",0,r.pickup+" → "+r.dropoff));
+if(r.distance_km!=null)c.append(el("span",0,"Distancia aprox.: "+r.distance_km+" km"));
+if(r.driver_name){c.append(el("br"),el("span",0,"Chofer: "+r.driver_name+" · "+stars(r.driver_name)))}
+if(r.price!=null)c.append(el("b","price","Tarifa: "+money(r.price)));
+const btn=(t,f,o)=>{const b=el("button",o?"o":0,t);b.onclick=f;c.append(b)};
+if(r.status==="cotizado"){btn("Aceptar tarifa",aceptar);btn("Rechazar tarifa",rechazar,1)}
+if(r.status==="pendiente")btn("Cancelar pedido",cancelar,1);
+if(r.status==="finalizado"){if(r.rating==null){c.append(el("p","s","Puntuá al chofer:"));const w=el("div","rt");for(let i=1;i<=5;i++){const b=el("button",0,"⭐"+i);b.onclick=()=>upd({rating:i});w.append(b)}c.append(w)}else c.append(el("p","s","Tu puntaje: ⭐ "+r.rating))}
+if(!live)btn("Pedir otro viaje",()=>{ride=null;store.del("ride");renderC()});
+$("ride").replaceChildren(c);
+const show=live&&["aceptado","en_camino","en_viaje"].includes(r.status)&&r.driver_lat!=null;
+if(show){const ll=[r.driver_lat,r.driver_lng];if(moto)moto.setLatLng(ll);else moto=L.marker(ll,{icon:icon("🏍️")}).addTo(map)}
+else if(moto){moto.remove();moto=null}}
+
+let rat={};
+const stars=n=>rat[n]?"⭐ "+(rat[n].s/rat[n].n).toFixed(1)+" ("+rat[n].n+")":"sin puntos aún";
+async function loadA(){const [a,b]=await Promise.all([db.from("drivers").select().eq("available",true).eq("active",true).gt("last_seen",new Date(Date.now()-60000).toISOString()),db.from("rides").select("driver_name,rating").not("rating","is",null)]);
+rat={};(b.data||[]).forEach(r=>{const x=rat[r.driver_name]||(rat[r.driver_name]={s:0,n:0});x.s+=r.rating;x.n++});
+const d=a.data||[];$("avail").replaceChildren(...(d.length?d.map(x=>{const c=el("div","c");c.append(el("b",0,x.name),el("span",0,(x.moto||"Moto sin modelo")+" · "+stars(x.name)));return c}):[el("p","s","No hay motos disponibles ahora.")]))}
+
+/* ---------- CHOFER ---------- */
+let watch=null,lastSend=0,activeIds=[];
+$("cn").value=store.get("chofer")||"";$("tb").value=store.get("tb")||1000;$("tk").value=store.get("tk")||800;
+$("cn").onchange=()=>{store.set("chofer",$("cn").value);loadD()};
+$("cm").value=store.get("moto")||"";$("av").checked=store.get("av")==="1";
+$("cm").onchange=()=>{store.set("moto",$("cm").value);loadD()};$("av").onchange=()=>{store.set("av",$("av").checked?"1":"0");loadD()};
+$("tb").oninput=$("tk").oninput=()=>{store.set("tb",$("tb").value);store.set("tk",$("tk").value);loadD()};
+async function setS(id,status,extra={}){const n=$("cn").value.trim();$("e2").textContent="";
+if(status==="cotizado"&&!n)return $("e2").textContent="Escribí tu nombre para enviar la tarifa.";
+const u={status,...extra};if(status==="cotizado")u.driver_name=n;
+let q=db.from("rides").update(u).eq("id",id);if(status==="cotizado")q=q.eq("status","pendiente");
+const {data,error}=await q.select();
+if(error)$("e2").textContent=error.message;else if(!data.length)$("e2").textContent="Ese pedido ya no está disponible.";
+loadD()}
+function card(r,label,next,info){const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,"Cliente: "+(r.client_name||"sin nombre")+(r.distance_km!=null?" · ≈ "+r.distance_km+" km":"")));
+if(r.price!=null)c.append(el("br"),el("b",0,"Tarifa: "+money(r.price)));
+if(r.pickup_exact)c.append(el("br"),el("b",0,"📍 Ubicación exacta por GPS"+(r.pickup_accuracy?" (±"+r.pickup_accuracy+" m)":"")));
+if(r.pickup_lat!=null){c.append(el("br"));const a=el("a",0,"Abrir recogida en Google Maps");a.href="https://www.google.com/maps/dir/?api=1&destination="+r.pickup_lat+","+r.pickup_lng;a.target="_blank";a.rel="noopener";c.append(a)}
+if(info)c.append(el("p","s",info));
+if(label){const b=el("button",0,label);b.onclick=()=>setS(r.id,next);c.append(b)}return c}
+function quote(r){const c=card(r);const i=el("input");i.type="number";i.inputMode="numeric";i.min=0;i.id="pr"+r.id;
+i.value=Math.round((+$("tb").value||0)+(+$("tk").value||0)*(r.distance_km||0));
+const l=el("label",0,"Tarifa a cobrar ($)");l.htmlFor=i.id;
+const b=el("button",0,"Enviar tarifa al cliente");b.onclick=()=>setS(r.id,"cotizado",{price:+i.value||0});
+c.append(l,i,b);return c}
+const empty=t=>el("p","s",t);
+function fin(r){const c=card(r);for(const [t,m] of [["Finalizar: cobró en efectivo","efectivo"],["Finalizar: cobró por transferencia","transferencia"]]){const b=el("button",m==="efectivo"?0:"o",t);b.onclick=()=>setS(r.id,"finalizado",{pay_method:m});c.append(b)}return c}
+async function borrarHist(){const n=$("cn").value.trim();if(!n||!confirm("¿Borrar tu historial y el total recaudado?"))return;
+await db.from("rides").update({driver_hidden:true}).eq("driver_name",n).eq("status","finalizado");loadD()}
+let seen=null;
+async function loadD(){if(!uid||!me||!me.active)return;const n=$("cn").value.trim();
+const {data:dm}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();
+if(!dm||!dm.active){track(false);return sesion()}
+db.from("drivers").update({moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
+const {data,error}=await db.from("rides").select().order("created_at");
+if(error)return $("e2").textContent=error.message;
+const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n):[],nw=data.filter(r=>r.status==="pendiente"),
+done=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&!r.driver_hidden):[];
+const ids=nw.map(r=>r.id);if(seen&&n&&$("av").checked&&ids.some(i=>!seen.has(i)))beep();seen=new Set(ids);
+activeIds=mine.filter(r=>r.status!=="cotizado").map(r=>r.id);track(activeIds.length>0);
+const sum=m=>done.filter(r=>r.pay_method===m).reduce((a,r)=>a+Number(r.price||0),0),t=el("div","c");
+t.append(el("b","price",money(done.reduce((a,r)=>a+Number(r.price||0),0))),el("span",0,done.length+" viajes · Efectivo "+money(sum("efectivo"))+" · Transferencia "+money(sum("transferencia"))));$("tot").replaceChildren(t);
+$("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?card(r,0,0,"Esperando que el cliente acepte la tarifa."):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
+if(!$("new").contains(document.activeElement))$("new").replaceChildren(...(nw.length?nw.map(quote):[empty("No hay pedidos por ahora.")]));
+$("hist").replaceChildren(...(done.length?done.slice(-20).reverse().map(r=>{const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,money(r.price||0)+" · "+(r.pay_method||"sin registrar")+(r.rating?" · ⭐"+r.rating:"")));return c}):[empty("Sin viajes en el historial.")]))}
+function track(on){if(on&&watch==null){if(!navigator.geolocation)return $("e2").textContent="Este navegador no permite compartir ubicación.";
+watch=navigator.geolocation.watchPosition(p=>{if(Date.now()-lastSend<4000||!activeIds.length)return;lastSend=Date.now();
+db.from("rides").update({driver_lat:p.coords.latitude,driver_lng:p.coords.longitude}).in("id",activeIds).then(()=>{})},
+()=>$("e2").textContent="Activá el GPS y permití la ubicación para que el cliente te vea.",{enableHighAccuracy:true})}
+else if(!on&&watch!=null){navigator.geolocation.clearWatch(watch);watch=null}}
+
+/* ---------- LOGIN, MEMBRESÍA Y ADMIN ---------- */
+let me=null,uid=null,isAdm=false;
+async function sesion(){track(false);const {data:{session}}=await db.auth.getSession();
+for(const k of["login","wait","admin","dapp","out"])$(k).hidden=true;me=null;uid=null;isAdm=false;
+if(!session){$("login").hidden=false;return}
+uid=session.user.id;$("out").hidden=false;
+isAdm=!!(await db.rpc("is_admin")).data;
+if(isAdm){$("admin").hidden=false;return loadAdm()}
+let {data}=await db.from("drivers").select().eq("user_id",uid).maybeSingle();
+if(!data){const m=session.user.user_metadata||{};data=(await db.from("drivers").insert({user_id:uid,name:m.name||session.user.email,moto:m.moto||""}).select().single()).data}
+if(!data){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta no está habilitada.";return}
+me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;
+if(!me.active){$("wait").hidden=false;return}
+$("dapp").hidden=false;loadD()}
+async function entrar(){$("e2").textContent="";const {error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
+if(error)return $("e2").textContent="No se pudo entrar: "+error.message;sesion()}
+async function registro(){$("e2").textContent="";
+if($("reg").hidden){$("reg").hidden=false;return $("e2").textContent="Completá tu nombre y modelo de moto y tocá de nuevo Crear cuenta."}
+const n=$("rn").value.trim();if(!n)return $("e2").textContent="Escribí tu nombre.";
+const {data,error}=await db.auth.signUp({email:$("em").value.trim(),password:$("pw").value,options:{data:{name:n,moto:$("rm").value.trim()}}});
+if(error)return $("e2").textContent=error.message;
+if(!data.session)return $("e2").textContent="Cuenta creada. Revisá tu correo para confirmarla y después entrá.";sesion()}
+async function salir(){if(uid&&!isAdm)await db.from("drivers").update({available:false}).eq("user_id",uid);await db.auth.signOut();sesion()}
+async function loadAdm(){const {data,error}=await db.from("drivers").select().order("name");if(error)return $("e2").textContent=error.message;
+$("dl").replaceChildren(...(data.length?data.map(d=>{const c=el("div","c");c.append(el("span","st",d.active?"Membresía activa":"Sin membresía"),el("b",0,d.name),el("span",0,d.moto||"Sin modelo"));
+const a=el("button",d.active?"o":0,d.active?"Suspender membresía":"Activar membresía");a.onclick=async()=>{await db.rpc("admin_set_active",{uid:d.user_id,flag:!d.active});loadAdm()};
+const x=el("button","o","Eliminar chofer de la app");x.onclick=async()=>{if(confirm("¿Eliminar a "+d.name+"? Se borra su cuenta y no podrá volver a entrar."))await db.rpc("admin_delete_driver",{uid:d.user_id});loadAdm()};
+c.append(a,x);return c}):[empty("Todavía no hay choferes registrados.")]))}
+
+/* ---------- INSTALAR COMO APP ---------- */
+let ip=null;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();ip=e;$("inst").hidden=false});
+$("inst").onclick=async()=>{if(!ip)return;ip.prompt();await ip.userChoice;ip=null;$("inst").hidden=true};
+addEventListener("appinstalled",()=>{$("inst").hidden=true});
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+
+/* ---------- TIEMPO REAL ---------- */
+db.channel("rides-all").on("postgres_changes",{event:"*",schema:"public",table:"rides"},()=>{refreshC();loadD();loadA()}).subscribe();
+setInterval(()=>{refreshC();loadD();loadA()},4000);renderC();refreshC();loadA();sesion();
+</script></main></body></html>
