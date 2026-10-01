@@ -32,6 +32,8 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <div class="tabs" role="tablist"><button id="tcli" role="tab" aria-selected="true" onclick="tab('cli')">Soy cliente</button><button id="tcho" role="tab" aria-selected="false" onclick="tab('cho')">Soy chofer</button></div>
 
 <section id="cli">
+<button id="pushc" hidden onclick="activarPush('cliente')">🔔 Activar avisos (suenan aunque la app esté cerrada)</button>
+<button class="o" onclick="probarNotif('cliente')">Probar notificación</button>
 <div id="form">
 <label for="n">Tu nombre</label><input id="n" autocomplete="name">
 <label for="p">Referencia de recogida (opcional)</label><input id="p" placeholder="Ej: Plaza central">
@@ -67,6 +69,8 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <h2>Choferes</h2><div id="dl"></div></div>
 <button class="o" id="out" onclick="salir()" hidden>Cerrar sesión</button>
 <div id="dapp" hidden>
+<button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
+<button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
 <label for="cn">Tu nombre</label><input id="cn" readonly>
 <label for="cm">Modelo de tu moto</label><input id="cm" placeholder="Ej: Honda Wave 110">
 <label for="al">Tu alias para transferencias</label><input id="al" placeholder="Ej: gustavo.mototaxi" autocapitalize="none" autocomplete="off">
@@ -94,7 +98,7 @@ const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s
 const money=n=>"$"+Number(n).toLocaleString("es-AR");
 let AC=null;function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}}
 document.addEventListener("click",unlock);
-function beep(n=3,f=880){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}if(!AC)return;for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.3;o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.3,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}}
+function beep(n=5,f=880){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}if(!AC)return;for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.3;o.frequency.value=f;o.connect(g);g.connect(AC.destination);o.type="square";g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}}
 const T={pendiente:"Esperando tarifa del chofer…",cotizado:"Un chofer te envió su tarifa",aceptado:"Tarifa aceptada, esperando que el chofer salga",en_camino:"El chofer va en camino a buscarte",en_viaje:"Viaje en curso",finalizado:"Viaje finalizado",cancelado:"Viaje cancelado"};
 const LIVE=["pendiente","cotizado","aceptado","en_camino","en_viaje"];
 function tab(w){for(const k of["cli","cho"]){$(k).hidden=k!==w;$("t"+k).setAttribute("aria-selected",k===w)}if(w==="cli")setTimeout(()=>map.invalidateSize(),50);else sesion()}
@@ -123,11 +127,11 @@ async function pedir(){$("e").textContent="";
 if(!pick||!dest)return $("e").textContent=pick?"Tocá en el mapa a dónde querés ir.":"Primero tocá el botón 📍 Enviar mi ubicación exacta.";
 $("go").disabled=true;$("go").textContent="Calculando distancia…";
 const d=Math.round(await km(pick,dest)*10)/10,n=$("n").value.trim();
-const row={client_name:n,pickup:$("p").value.trim()||"Punto en el mapa",dropoff:$("d").value.trim()||"Destino en el mapa",pickup_lat:pick.lat,pickup_lng:pick.lng,pickup_exact:gps,pickup_accuracy:acc,dropoff_lat:dest.lat,dropoff_lng:dest.lng,distance_km:d};
+const row={client_id:cid,client_name:n,pickup:$("p").value.trim()||"Punto en el mapa",dropoff:$("d").value.trim()||"Destino en el mapa",pickup_lat:pick.lat,pickup_lng:pick.lng,pickup_exact:gps,pickup_accuracy:acc,dropoff_lat:dest.lat,dropoff_lng:dest.lng,distance_km:d};
 const {data,error}=await db.from("rides").insert(row).select().single();
 $("go").disabled=false;$("go").textContent="Pedir mototaxi";
 if(error)return $("e").textContent="No se pudo pedir: "+error.message;
-ride=data;store.set("ride",JSON.stringify(data));store.set("nombre",n);renderC()}
+ride=data;store.set("ride",JSON.stringify(data));if(window.Notification&&Notification.permission==="granted")activarPush("cliente",1);store.set("nombre",n);renderC()}
 async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.id);if(onlyStatus)q=q.eq("status",onlyStatus);await q;refreshC()}
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
 const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null},"cotizado");
@@ -222,7 +226,7 @@ if(!data){const m=session.user.user_metadata||{};data=(await db.from("drivers").
 if(!data){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta no está habilitada.";return}
 me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;if(me.alias)$("al").value=me.alias;
 if(!me.active){$("wait").hidden=false;return}
-$("dapp").hidden=false;loadD()}
+$("dapp").hidden=false;loadD();refreshPushUI();if(window.Notification&&Notification.permission==="granted")activarPush("chofer",1)}
 async function entrar(){$("e2").textContent="";const {error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
 if(error)return $("e2").textContent="No se pudo entrar: "+error.message;sesion()}
 async function registro(){$("e2").textContent="";
@@ -259,6 +263,25 @@ function saveF(){store.set("form",JSON.stringify({n:$("n").value,p:$("p").value,
 for(const i of["n","p","d"])$(i).addEventListener("input",saveF);
 try{const f=JSON.parse(store.get("form")||"{}");if(f.n)$("n").value=f.n;if(f.p)$("p").value=f.p;if(f.d)$("d").value=f.d;
 if(f.pick){setPickup(f.pick);map.setView(f.pick,15);gps=!!f.gps;acc=f.acc||null}if(f.dest)setDest(f.dest)}catch(e){}
+
+/* ---------- NOTIFICACIONES PUSH (funcionan con la app cerrada) ---------- */
+const VAPID="BGsIfi8ZkrDD8mglmkExXZk-_JIl4s6uBIaKLTzEFmfkflN2iFPLWY2BXNBI9VWi2L4EInr68IMoPj2dJa_pTJM";
+const cid=store.get("cid")||(()=>{const v=crypto.randomUUID();store.set("cid",v);return v})();
+const b64=u=>{const a=atob((u+"=".repeat((4-u.length%4)%4)).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from([...a].map(c=>c.charCodeAt(0)))};
+function refreshPushUI(){const ok=!("Notification" in window)||Notification.permission==="granted";$("pushc").hidden=ok;$("pushd").hidden=ok}
+async function activarPush(rol,silent){const al=m=>{if(!silent)alert(m)};
+if(!("serviceWorker" in navigator)||!("PushManager" in window))return al("Este navegador no permite notificaciones. Abrí la app desde Chrome.");
+const p=await Notification.requestPermission();refreshPushUI();
+if(p!=="granted")return al("No diste permiso. Activá las notificaciones de GPTAXI en los ajustes del celular.");
+try{const reg=await navigator.serviceWorker.ready;
+const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(VAPID)});
+const {error}=await db.rpc("save_push",{p_role:rol,p_client_id:rol==="cliente"?cid:null,p_sub:sub.toJSON()});
+if(error)return al("No se pudo activar: "+error.message);al("✅ Notificaciones activadas.")}catch(e){al("No se pudo activar: "+e.message)}}
+async function probarNotif(rol){if(!("Notification" in window)||Notification.permission!=="granted")return alert("Primero activá las notificaciones.");
+const t=rol==="cliente"?["🏍️ ¡Tu mototaxi va en camino!","Juan sale a buscarte a Plaza central.\n(Notificación de prueba)"]:["🏍️ ¡NUEVO VIAJE!","📍 Recogida: Plaza central\n🏁 Destino: Hospital\n📏 3.2 km · Cliente de prueba"];
+const reg=await navigator.serviceWorker.ready;reg.showNotification(t[0],{body:t[1],icon:"icon-192.png",badge:"badge-96.png",tag:"prueba",renotify:true,requireInteraction:true,lang:"es",vibrate:[600,200,600,200,600,200,900]})}
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.type==="push"){loadD();refreshC()}});
+refreshPushUI();
 
 /* ---------- INSTALAR COMO APP ---------- */
 let ip=null;
