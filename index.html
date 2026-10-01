@@ -1,4 +1,4 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Mototaxi</title>
+<!doctype html><html lang="es"><head><meta charset="utf-8"><title>GPTAXI</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0E3B2E">
 <link rel="manifest" href="manifest.json">
@@ -8,15 +8,15 @@
 <style>
 :root{--bg:#F6F3E8;--ink:#10261E;--g:#0E3B2E;--y:#F2B705;--line:#D9D3BF}
 @media(prefers-color-scheme:dark){:root{--bg:#10261E;--ink:#F6F3E8;--line:#2A4A3E}}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
+*{box-sizing:border-box}html,body{overscroll-behavior-y:contain}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Trebuchet MS",system-ui,sans-serif}
 main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
 h1{font-size:26px;margin:0 0 12px}h2{font-size:19px;margin:22px 0 0}p.s{margin:8px 0;opacity:.7}
 .tabs,.seg,.row{display:flex;gap:8px}.row>div{flex:1}
 .tabs button,.seg button{margin:8px 0 0;background:transparent;border:2px solid var(--line);color:inherit;padding:11px}
 .tabs button[aria-selected=true],.seg button[aria-pressed=true]{background:var(--g);border-color:var(--g);color:#fff}
 label{display:block;font-weight:700;margin:12px 0 4px}
-input{width:100%;padding:13px;border:2px solid var(--line);border-radius:10px;background:transparent;color:inherit;font:inherit}
-input:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--y);outline-offset:1px}
+input,select,textarea{width:100%;padding:13px;border:2px solid var(--line);border-radius:10px;background:transparent;color:inherit;font:inherit}
+select{background:var(--bg)}input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--y);outline-offset:1px}
 button{width:100%;margin-top:14px;padding:14px;border:0;border-radius:10px;background:var(--y);color:#10261E;font:700 17px "Trebuchet MS",system-ui,sans-serif;cursor:pointer}
 button.o{background:transparent;border:2px solid var(--line);color:inherit;margin-top:10px}
 #map{height:260px;border-radius:10px;border:2px solid var(--line);margin-top:10px}
@@ -27,7 +27,7 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 .moto{font-size:28px;line-height:1}
 .rt{display:flex;gap:6px}.rt button{margin:8px 0 0;padding:10px 4px;background:transparent;border:2px solid var(--line);color:inherit}
 </style></head><body><main>
-<h1>Mototaxi</h1>
+<h1>GPTAXI</h1>
 <button id="inst" hidden style="margin:0 0 12px">📲 Instalar la app en tu celular</button>
 <div class="tabs" role="tablist"><button id="tcli" role="tab" aria-selected="true" onclick="tab('cli')">Soy cliente</button><button id="tcho" role="tab" aria-selected="false" onclick="tab('cho')">Soy chofer</button></div>
 
@@ -45,6 +45,10 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <div id="ride"></div><div class="err" id="e"></div>
 <h2>Motos disponibles</h2><div id="avail"></div>
 <div id="map"></div>
+<details class="c"><summary><b>✉️ Enviar mensaje al administrador</b></summary>
+<label for="mk">Tipo</label><select id="mk"><option value="mejora">Sugerencia de mejora</option><option value="queja">Queja</option></select>
+<label for="mb">Tu mensaje</label><textarea id="mb" rows="4" maxlength="1000"></textarea>
+<button onclick="enviarMsg()">Enviar mensaje</button><div class="err" id="mm"></div></details>
 </section>
 
 <section id="cho" hidden>
@@ -56,11 +60,16 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <button onclick="entrar()">Entrar</button><button class="o" onclick="registro()">Crear cuenta de chofer</button>
 </div>
 <div id="wait" hidden><div class="c"><b>Membresía no activa</b><span>Tu cuenta está registrada pero todavía no fue activada. Contactá al administrador para abonar la membresía.</span></div></div>
-<div id="admin" hidden><h2>Administrador: choferes</h2><div id="dl"></div></div>
+<div id="admin" hidden><h2>Viajes facturados</h2>
+<label for="rp">Período</label><select id="rp"><option value="hoy">Hoy</option><option value="mes" selected>Este mes</option><option value="todo">Todo</option></select>
+<div id="fact"></div>
+<h2>Mensajes de clientes</h2><div id="msgs"></div>
+<h2>Choferes</h2><div id="dl"></div></div>
 <button class="o" id="out" onclick="salir()" hidden>Cerrar sesión</button>
 <div id="dapp" hidden>
 <label for="cn">Tu nombre</label><input id="cn" readonly>
 <label for="cm">Modelo de tu moto</label><input id="cm" placeholder="Ej: Honda Wave 110">
+<label for="al">Tu alias para transferencias</label><input id="al" placeholder="Ej: gustavo.mototaxi" autocapitalize="none" autocomplete="off">
 <label style="display:flex;gap:8px;align-items:center"><input id="av" type="checkbox" style="width:auto"> Estoy disponible (los clientes me ven y suena el aviso)</label>
 <button class="o" onclick="unlock();beep()">Probar sonido de aviso</button>
 <h2>Mis tarifas (ejemplo, editalas)</h2>
@@ -97,8 +106,8 @@ let pin=null,dpin=null,moto=null,pick=null,dest=null,ride=null,mode="d",gps=fals
 const icon=h=>L.divIcon({className:"moto",html:h,iconSize:[30,30]});
 function setMode(m){mode=m;$("mp").setAttribute("aria-pressed",m==="p");$("md").setAttribute("aria-pressed",m==="d")}
 map.on("click",e=>mode==="p"?(gps=false,acc=null,setPickup(e.latlng)):setDest(e.latlng));
-function setPickup(ll){pick=ll;if(pin)pin.setLatLng(ll);else pin=L.marker(ll).addTo(map);setMode("d")}
-function setDest(ll){dest=ll;if(dpin)dpin.setLatLng(ll);else dpin=L.marker(ll,{icon:icon("🏁")}).addTo(map)}
+function setPickup(ll){pick=ll;setTimeout(saveF);if(pin)pin.setLatLng(ll);else pin=L.marker(ll).addTo(map);setMode("d")}
+function setDest(ll){dest=ll;setTimeout(saveF);if(dpin)dpin.setLatLng(ll);else dpin=L.marker(ll,{icon:icon("🏁")}).addTo(map)}
 function miUbic(){$("e").textContent="";const g=$("gpsok");
 if(!navigator.geolocation)return $("e").textContent="Tu navegador no permite ubicación. Tocá el mapa para marcar dónde estás.";
 g.textContent="Buscando tu ubicación…";
@@ -131,6 +140,8 @@ const c=el("div","c");c.append(el("span","st",T[r.status]),el("b",0,r.pickup+" �
 if(r.distance_km!=null)c.append(el("span",0,"Distancia aprox.: "+r.distance_km+" km"));
 if(r.driver_name){c.append(el("br"),el("span",0,"Chofer: "+r.driver_name+" · "+stars(r.driver_name)))}
 if(r.price!=null)c.append(el("b","price","Tarifa: "+money(r.price)));
+if(r.driver_alias){const al=el("div","c");al.append(el("span",0,"Alias para pagar por transferencia:"),el("b",0,r.driver_alias));const cb=el("button","o","📋 Copiar alias");
+cb.onclick=async()=>{try{await navigator.clipboard.writeText(r.driver_alias);cb.textContent="✅ Copiado"}catch(e){cb.textContent="Copiá el alias a mano"}};al.append(cb);c.append(al)}
 const btn=(t,f,o)=>{const b=el("button",o?"o":0,t);b.onclick=f;c.append(b)};
 if(r.status==="cotizado"){btn("Aceptar tarifa",aceptar);btn("Rechazar tarifa",rechazar,1)}
 if(r.status==="pendiente")btn("Cancelar pedido",cancelar,1);
@@ -156,7 +167,7 @@ $("cm").onchange=()=>{store.set("moto",$("cm").value);loadD()};$("av").onchange=
 $("tb").oninput=$("tk").oninput=()=>{store.set("tb",$("tb").value);store.set("tk",$("tk").value);loadD()};
 async function setS(id,status,extra={}){const n=$("cn").value.trim();$("e2").textContent="";
 if(status==="cotizado"&&!n)return $("e2").textContent="Escribí tu nombre para enviar la tarifa.";
-const u={status,...extra};if(status==="cotizado")u.driver_name=n;
+const u={status,...extra};if(status==="cotizado"){u.driver_name=n;u.driver_alias=$("al").value.trim()}
 let q=db.from("rides").update(u).eq("id",id);if(status==="cotizado")q=q.eq("status","pendiente");
 const {data,error}=await q.select();
 if(error)$("e2").textContent=error.message;else if(!data.length)$("e2").textContent="Ese pedido ya no está disponible.";
@@ -180,7 +191,7 @@ let seen=null;
 async function loadD(){if(!uid||!me||!me.active)return;const n=$("cn").value.trim();
 const {data:dm}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();
 if(!dm||!dm.active){track(false);return sesion()}
-db.from("drivers").update({moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
+db.from("drivers").update({alias:$("al").value.trim(),moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
 const {data,error}=await db.from("rides").select().order("created_at");
 if(error)return $("e2").textContent=error.message;
 const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n):[],nw=data.filter(r=>r.status==="pendiente"),
@@ -209,7 +220,7 @@ if(isAdm){$("admin").hidden=false;return loadAdm()}
 let {data}=await db.from("drivers").select().eq("user_id",uid).maybeSingle();
 if(!data){const m=session.user.user_metadata||{};data=(await db.from("drivers").insert({user_id:uid,name:m.name||session.user.email,moto:m.moto||""}).select().single()).data}
 if(!data){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta no está habilitada.";return}
-me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;
+me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;if(me.alias)$("al").value=me.alias;
 if(!me.active){$("wait").hidden=false;return}
 $("dapp").hidden=false;loadD()}
 async function entrar(){$("e2").textContent="";const {error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
@@ -221,11 +232,33 @@ const {data,error}=await db.auth.signUp({email:$("em").value.trim(),password:$("
 if(error)return $("e2").textContent=error.message;
 if(!data.session)return $("e2").textContent="Cuenta creada. Revisá tu correo para confirmarla y después entrá.";sesion()}
 async function salir(){if(uid&&!isAdm)await db.from("drivers").update({available:false}).eq("user_id",uid);await db.auth.signOut();sesion()}
-async function loadAdm(){const {data,error}=await db.from("drivers").select().order("name");if(error)return $("e2").textContent=error.message;
+async function loadFact(){const p=$("rp").value,n=new Date(),f=p==="hoy"?new Date(n.getFullYear(),n.getMonth(),n.getDate()):p==="mes"?new Date(n.getFullYear(),n.getMonth(),1):null;
+let q=db.from("rides").select("driver_name,price,pay_method").eq("status","finalizado");if(f)q=q.gte("created_at",f.toISOString());
+const {data,error}=await q;if(error)return $("e2").textContent=error.message;
+const g={};data.forEach(r=>{const k=r.driver_name||"Sin chofer",x=g[k]||(g[k]={n:0,t:0,e:0,tr:0}),v=Number(r.price||0);x.n++;x.t+=v;if(r.pay_method==="efectivo")x.e+=v;else if(r.pay_method==="transferencia")x.tr+=v});
+const rows=Object.entries(g).sort((a,b)=>b[1].t-a[1].t),h=el("div","c");
+h.append(el("b","price",money(rows.reduce((a,[,x])=>a+x.t,0))),el("span",0,rows.reduce((a,[,x])=>a+x.n,0)+" viajes facturados"));
+$("fact").replaceChildren(h,...rows.map(([k,x])=>{const c=el("div","c");c.append(el("b",0,k),el("span",0,x.n+" viajes · "+money(x.t)+" · Efectivo "+money(x.e)+" · Transferencia "+money(x.tr)));return c}))}
+async function loadMsg(){const {data,error}=await db.from("messages").select().order("created_at",{ascending:false}).limit(30);if(error)return $("e2").textContent=error.message;
+$("msgs").replaceChildren(...(data.length?data.map(m=>{const c=el("div","c");c.append(el("span","st",(m.kind==="queja"?"Queja":"Mejora")+(m.leido?"":" · nuevo")),el("b",0,m.client_name||"Cliente sin nombre"),el("span",0,m.body));
+const a=el("button","o",m.leido?"Marcar como no leído":"Marcar como leído");a.onclick=async()=>{await db.from("messages").update({leido:!m.leido}).eq("id",m.id);loadMsg()};
+const x=el("button","o","Borrar mensaje");x.onclick=async()=>{await db.from("messages").delete().eq("id",m.id);loadMsg()};c.append(a,x);return c}):[empty("No hay mensajes.")]))}
+$("rp").onchange=loadFact;
+async function loadAdm(){loadFact();loadMsg();const {data,error}=await db.from("drivers").select().order("name");if(error)return $("e2").textContent=error.message;
 $("dl").replaceChildren(...(data.length?data.map(d=>{const c=el("div","c");c.append(el("span","st",d.active?"Membresía activa":"Sin membresía"),el("b",0,d.name),el("span",0,d.moto||"Sin modelo"));
 const a=el("button",d.active?"o":0,d.active?"Suspender membresía":"Activar membresía");a.onclick=async()=>{await db.rpc("admin_set_active",{uid:d.user_id,flag:!d.active});loadAdm()};
 const x=el("button","o","Eliminar chofer de la app");x.onclick=async()=>{if(confirm("¿Eliminar a "+d.name+"? Se borra su cuenta y no podrá volver a entrar."))await db.rpc("admin_delete_driver",{uid:d.user_id});loadAdm()};
 c.append(a,x);return c}):[empty("Todavía no hay choferes registrados.")]))}
+
+async function enviarMsg(){const b=$("mb").value.trim(),m=$("mm");m.style.color="";m.textContent="";if(!b)return m.textContent="Escribí tu mensaje.";
+const {error}=await db.from("messages").insert({client_name:$("n").value.trim(),kind:$("mk").value,body:b});
+if(error)return m.textContent="No se pudo enviar: "+error.message;$("mb").value="";m.style.color="inherit";m.textContent="✅ Mensaje enviado. ¡Gracias!"}
+
+/* ---------- GUARDAR LO QUE ESCRIBE EL CLIENTE ---------- */
+function saveF(){store.set("form",JSON.stringify({n:$("n").value,p:$("p").value,d:$("d").value,pick,dest,gps,acc}))}
+for(const i of["n","p","d"])$(i).addEventListener("input",saveF);
+try{const f=JSON.parse(store.get("form")||"{}");if(f.n)$("n").value=f.n;if(f.p)$("p").value=f.p;if(f.d)$("d").value=f.d;
+if(f.pick){setPickup(f.pick);map.setView(f.pick,15);gps=!!f.gps;acc=f.acc||null}if(f.dest)setDest(f.dest)}catch(e){}
 
 /* ---------- INSTALAR COMO APP ---------- */
 let ip=null;
