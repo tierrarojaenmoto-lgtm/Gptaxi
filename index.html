@@ -61,6 +61,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 .sheetin .c{background:var(--c3);animation:none;box-shadow:none;margin-top:8px}
 .sh{display:flex;justify-content:space-between;align-items:center}.sh b{font-size:18px;color:#ffe1a7}
 .tbar{height:6px;background:var(--c2);border-radius:99px;overflow:hidden;margin-top:12px}.tbar i{display:block;height:100%;background:var(--y);width:100%;transition:width 1s linear}
+.c.bad{background:rgba(255,180,171,.1);box-shadow:0 0 0 2px var(--err)}
 </style></head>
 <body data-r="cli">
 <header><div class="hb"><div class="brand"><img src="icon-192.png" alt="GPTAXI"><div><b>GPTAXI</b><small>Mototaxi</small></div></div>
@@ -109,6 +110,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 
 <div id="dapp" hidden>
 <div id="dv-viajes">
+<div id="alerts"></div>
 <div class="c stat"><i class="dot" id="sdot"></i><div><b id="slab">DESCONECTADO</b><small id="ssub">Tocá para volver al servicio</small></div>
 <button id="sbtn" class="o" onclick="toggleOnline()"><span>Conectar</span><span class="material-symbols-outlined">power_settings_new</span></button></div>
 <input id="av" type="checkbox" hidden>
@@ -129,7 +131,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <div><label for="tk">Por km ($)</label><input id="tk" type="number" inputmode="numeric" min="0"></div></div>
 <p class="s">Precio = base + km × tarifa por km. Podés ajustarlo en cada pedido antes de enviarlo.</p>
 <label for="mt">Meta diaria ($)</label><input id="mt" type="number" inputmode="numeric" min="0">
-<h2>Notificaciones</h2>
+<h2>Notificaciones</h2><p class="s" id="pstat"></p>
 <button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
 <button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
 <button class="o" onclick="unlock();beep()">Probar sonido de aviso</button>
@@ -147,7 +149,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 </main>
 
 <div class="sheet" id="sheet" hidden><div class="sheetin">
-<div class="sh"><span class="st urgent">¡Nueva solicitud cercana!</span><b>⏱ <span id="cd">15s</span></b></div>
+<div class="sh"><span class="st urgent" id="shtitle">¡Nueva solicitud cercana!</span><b>⏱ <span id="cd">15s</span></b></div>
 <div id="sheetBody"></div>
 <div class="tbar"><i id="cbar"></i></div>
 <button class="o" onclick="rechazarSheet()">Rechazar</button>
@@ -200,21 +202,25 @@ const hav=(a,b)=>{const r=x=>x*Math.PI/180,h=Math.sin(r(b.lat-a.lat)/2)**2+Math.
 async function km(a,b){try{const c=new AbortController();setTimeout(()=>c.abort(),4000);
 const r=await fetch(`https://router.project-osrm.org/route/v1/driving/${a.lng},${a.lat};${b.lng},${b.lat}?overview=false`,{signal:c.signal});
 return (await r.json()).routes[0].distance/1000}catch(e){return hav(a,b)*1.3}}
+async function loc(ll){try{const c=new AbortController();setTimeout(()=>c.abort(),3500);
+const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=16&accept-language=es&lat=${ll.lat}&lon=${ll.lng}`,{signal:c.signal});
+const a=(await r.json()).address||{};
+return [a.neighbourhood||a.suburb||a.quarter,a.city||a.town||a.village||a.municipality||a.hamlet||a.county].filter(Boolean).filter((x,i,arr)=>arr.indexOf(x)===i).join(", ")}catch(e){return ""}}
 try{ride=JSON.parse(store.get("ride"));$("n").value=store.get("nombre")||""}catch(e){}
 async function pedir(){$("e").textContent="";
 if(!pick||!dest)return $("e").textContent=pick?"Tocá en el mapa a dónde querés ir.":"Primero tocá el botón 📍 Enviar mi ubicación exacta.";
 $("go").disabled=true;$("go").textContent="Calculando distancia…";
-const d=Math.round(await km(pick,dest)*10)/10,n=$("n").value.trim();
-const row={client_id:cid,client_name:n,pickup:$("p").value.trim()||"Punto en el mapa",dropoff:$("d").value.trim()||"Destino en el mapa",pickup_lat:pick.lat,pickup_lng:pick.lng,pickup_exact:gps,pickup_accuracy:acc,dropoff_lat:dest.lat,dropoff_lng:dest.lng,distance_km:d};
+const [dk,lp,ld]=await Promise.all([km(pick,dest),loc(pick),loc(dest)]),d=Math.round(dk*10)/10,n=$("n").value.trim();
+const row={client_id:cid,client_name:n,pickup_loc:lp,dropoff_loc:ld,pickup:$("p").value.trim()||"Punto en el mapa",dropoff:$("d").value.trim()||"Destino en el mapa",pickup_lat:pick.lat,pickup_lng:pick.lng,pickup_exact:gps,pickup_accuracy:acc,dropoff_lat:dest.lat,dropoff_lng:dest.lng,distance_km:d};
 const {data,error}=await db.from("rides").insert(row).select().single();
 $("go").disabled=false;$("go").textContent="Pedir mototaxi";
 if(error)return $("e").textContent="No se pudo pedir: "+error.message;
 ride=data;store.set("ride",JSON.stringify(data));if(window.Notification&&Notification.permission==="granted")activarPush("cliente",1);store.set("nombre",n);renderC()}
 async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.id);if(onlyStatus)q=q.eq("status",onlyStatus);await q;refreshC()}
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
-const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null},"cotizado");
-const cancelar=()=>upd({status:"cancelado"});
-async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if(data.status!==ride.status){if(data.status==="cotizado")beep(2,660);if(data.status==="en_camino")beep(3,988)}ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
+const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(ride.tariff_rejected_by||[]),ride.driver_name],event_at:new Date().toISOString()},"cotizado");
+const cancelar=()=>{if(["aceptado","en_camino"].includes(ride.status)&&!confirm("¿Cancelar el viaje? Se le avisa al chofer."))return;return upd({status:"cancelado",event_at:new Date().toISOString()})};
+async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if((data.rejected_by||[]).length>(ride.rejected_by||[]).length)beep(2,440);if(data.status!==ride.status){if(data.status==="cotizado")beep(2,660);if(data.status==="en_camino")beep(3,988)}ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
 function renderC(){const r=ride,live=r&&LIVE.includes(r.status);
 $("form").hidden=!!live;
 if(!r){$("ride").replaceChildren();return}
@@ -229,9 +235,11 @@ else c.append(el("b",0,"El chofer salió a buscarte. Esperalo en tu punto."))}
 if(r.price!=null)c.append(el("b","price","Tarifa: "+money(r.price)));
 if(r.driver_alias){const al=el("div","c");al.append(el("span",0,"Alias para pagar por transferencia:"),el("b",0,r.driver_alias));const cb=el("button","o","📋 Copiar alias");
 cb.onclick=async()=>{try{await navigator.clipboard.writeText(r.driver_alias);cb.textContent="✅ Copiado"}catch(e){cb.textContent="Copiá el alias a mano"}};al.append(cb);c.append(al)}
+if(r.status==="pendiente"&&(r.rejected_by||[]).length){const rj=r.rejected_by,todos=availNames.length&&availNames.every(x=>rj.includes(x));
+c.append(el("b",0,"🚫 "+(todos?"Ningún chofer disponible pudo tomar tu viaje":(rj.length===1?rj[0]+" no pudo tomar tu viaje":rj.length+" choferes no pudieron tomar tu viaje"))),el("span",0,todos?"Podés seguir esperando o cancelar el pedido.":"Seguimos buscando otro chofer."))}
 const btn=(t,f,o)=>{const b=el("button",o?"o":0,t);b.onclick=f;c.append(b)};
 if(r.status==="cotizado"){btn("Aceptar tarifa",aceptar);btn("Rechazar tarifa",rechazar,1)}
-if(r.status==="pendiente")btn("Cancelar pedido",cancelar,1);
+if(["pendiente","cotizado","aceptado","en_camino"].includes(r.status))btn("Cancelar pedido",cancelar,1);
 if(r.status==="finalizado"){if(r.rating==null){c.append(el("p","s","Puntuá al chofer:"));const w=el("div","rt");for(let i=1;i<=5;i++){const b=el("button",0,"⭐"+i);b.onclick=()=>upd({rating:i});w.append(b)}c.append(w)}else c.append(el("p","s","Tu puntaje: ⭐ "+r.rating))}
 if(!live)btn("Pedir otro viaje",()=>{ride=null;store.del("ride");renderC()});
 $("ride").replaceChildren(c);
@@ -239,11 +247,11 @@ const show=live&&["aceptado","en_camino","en_viaje"].includes(r.status)&&r.drive
 if(show){const ll=[r.driver_lat,r.driver_lng];if(moto)moto.setLatLng(ll);else{moto=L.marker(ll,{icon:icon("🏍️")}).addTo(map);if(r.pickup_lat!=null)map.fitBounds([ll,[r.pickup_lat,r.pickup_lng]],{padding:[40,40]})}}
 else if(moto){moto.remove();moto=null}}
 
-let rat={};const motoOf={};
+let rat={};const motoOf={};let availNames=[];
 const stars=n=>rat[n]?"⭐ "+(rat[n].s/rat[n].n).toFixed(1)+" ("+rat[n].n+")":"sin puntos aún";
 async function loadA(){const [a,b]=await Promise.all([db.from("drivers").select().eq("available",true).eq("active",true).gt("last_seen",new Date(Date.now()-60000).toISOString()),db.from("rides").select("driver_name,rating").not("rating","is",null)]);
 rat={};(b.data||[]).forEach(r=>{const x=rat[r.driver_name]||(rat[r.driver_name]={s:0,n:0});x.s+=r.rating;x.n++});
-const d=a.data||[];$("avail").replaceChildren(...(d.length?d.map(x=>{const c=el("div","c");c.append(el("b",0,x.name),el("span",0,(x.moto||"Moto sin modelo")+" · "+stars(x.name)));return c}):[el("p","s","No hay motos disponibles ahora.")]))}
+const d=a.data||[];availNames=d.map(x=>x.name);$("avail").replaceChildren(...(d.length?d.map(x=>{const c=el("div","c");c.append(el("b",0,x.name),el("span",0,(x.moto||"Moto sin modelo")+" · "+stars(x.name)));return c}):[el("p","s","No hay motos disponibles ahora.")]))}
 
 /* ---------- CHOFER ---------- */
 let watch=null,lastSend=0,activeIds=[];
@@ -254,40 +262,53 @@ $("cm").onchange=()=>{store.set("moto",$("cm").value);loadD()};$("av").onchange=
 $("tb").oninput=$("tk").oninput=()=>{store.set("tb",$("tb").value);store.set("tk",$("tk").value);loadD()};
 async function setS(id,status,extra={}){const n=$("cn").value.trim();$("e2").textContent="";
 if(status==="cotizado"&&!n)return $("e2").textContent="Escribí tu nombre para enviar la tarifa.";
-const u={status,...extra};if(status==="cotizado"){u.driver_name=n;u.driver_alias=$("al").value.trim()}
+const u={status,...extra};if(status==="cotizado"){u.driver_name=n;u.driver_alias=$("al").value.trim();u.quoted_at=new Date().toISOString()}
 let q=db.from("rides").update(u).eq("id",id);if(status==="cotizado")q=q.eq("status","pendiente");
 const {data,error}=await q.select();
 if(error)$("e2").textContent=error.message;else if(!data.length)$("e2").textContent="Ese pedido ya no está disponible.";
 loadD()}
 function card(r,label,next,info){const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,"Cliente: "+(r.client_name||"sin nombre")+(r.distance_km!=null?" · ≈ "+r.distance_km+" km":"")));
+if(r.pickup_loc||r.dropoff_loc)c.prepend(el("span","st urgent","🗺️ "+[r.pickup_loc,r.dropoff_loc&&r.dropoff_loc!==r.pickup_loc?"→ "+r.dropoff_loc:""].filter(Boolean).join(" ")));
 if(r.price!=null)c.append(el("br"),el("b",0,"Tarifa: "+money(r.price)));
 if(r.pickup_exact)c.append(el("br"),el("b",0,"📍 Ubicación exacta por GPS"+(r.pickup_accuracy?" (±"+r.pickup_accuracy+" m)":"")));
 if(r.pickup_lat!=null){c.append(el("br"));const a=el("a",0,"Abrir recogida en Google Maps");a.href="https://www.google.com/maps/dir/?api=1&destination="+r.pickup_lat+","+r.pickup_lng;a.target="_blank";a.rel="noopener";c.append(a)}
 if(info)c.append(el("p","s",info));
 if(label){const b=el("button",0,label);b.onclick=()=>setS(r.id,next);c.append(b)}return c}
-function quote(r){const c=card(r);c.className="c alert";c.prepend(el("span","st urgent","🚨 NUEVO VIAJE"));const i=el("input");i.type="number";i.inputMode="numeric";i.min=0;i.id="pr"+r.id;
+function quote(r,nr){const c=card(r);c.className="c alert";c.prepend(el("span","st urgent","🚨 NUEVO VIAJE"));const i=el("input");i.type="number";i.inputMode="numeric";i.min=0;i.id="pr"+r.id;
 i.value=Math.round((+$("tb").value||0)+(+$("tk").value||0)*(r.distance_km||0));
 const l=el("label",0,"Tarifa a cobrar ($)");l.htmlFor=i.id;
 const b=el("button",0,"Enviar tarifa al cliente");b.onclick=()=>setS(r.id,"cotizado",{price:+i.value||0});
-c.append(l,i,b);return c}
+c.append(l,i,b);
+if(!nr){const rj=el("button","o","Rechazar");rj.onclick=async()=>{dism.add(r.id);await db.rpc("driver_reject",{p_ride:r.id});loadD()};c.append(rj)}return c}
 const empty=t=>el("p","s",t);
+const liberar=id=>db.from("rides").update({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null}).eq("id",id).eq("status","cotizado");
+async function retirar(id){await liberar(id);loadD()}
+function quoteWait(r){const m=r.quoted_at?Math.max(0,Math.round((Date.now()-new Date(r.quoted_at))/6e4)):null;
+const c=card(r,0,0,"Esperando que el cliente acepte la tarifa"+(m!=null?" · hace "+m+" min":"")+".");
+const b=el("button","o","Retirar tarifa");b.onclick=()=>retirar(r.id);c.append(b);return c}
 function fin(r){const c=card(r);for(const [t,m] of [["Finalizar: cobró en efectivo","efectivo"],["Finalizar: cobró por transferencia","transferencia"]]){const b=el("button",m==="efectivo"?0:"o",t);b.onclick=()=>setS(r.id,"finalizado",{pay_method:m});c.append(b)}return c}
 async function borrarHist(){const n=$("cn").value.trim();if(!n||!confirm("¿Borrar tu historial y el total recaudado?"))return;
 await db.from("rides").update({driver_hidden:true}).eq("driver_name",n).eq("status","finalizado");loadD()}
-let seen=null;
+let seen=null,seenAl=null;
 async function loadD(){if(!uid||!me||!me.active)return;const n=$("cn").value.trim();
 const {data:dm,error:de}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();if(de)return;
 if(!dm||!dm.active){track(false);return sesion()}
 db.from("drivers").update({alias:$("al").value.trim(),moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
 const {data,error}=await db.from("rides").select().order("created_at");
 if(error)return $("e2").textContent=error.message;
-const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n):[],nw=data.filter(r=>r.status==="pendiente"),
+const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n&&!(r.status==="cotizado"&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5)):[],nw=data.filter(r=>r.status==="pendiente"&&Date.now()-new Date(r.created_at)<18e5&&!(r.rejected_by||[]).includes(n)),
 done=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&!r.driver_hidden):[];
+data.filter(r=>r.status==="cotizado"&&r.driver_name===n&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5).forEach(r=>liberar(r.id));
 const ids=nw.map(r=>r.id);if(seen&&n&&$("av").checked&&ids.some(i=>!seen.has(i)))beep();seen=new Set(ids);
 activeIds=mine.filter(r=>r.status!=="cotizado").map(r=>r.id);track(activeIds.length>0);
 const sum=m=>done.filter(r=>r.pay_method===m).reduce((a,r)=>a+Number(r.price||0),0),t=el("div","c");
 t.append(el("b","price",money(done.reduce((a,r)=>a+Number(r.price||0),0))),el("span",0,done.length+" viajes · Efectivo "+money(sum("efectivo"))+" · Transferencia "+money(sum("transferencia"))));$("tot").replaceChildren(t);
-$("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?card(r,0,0,"Esperando que el cliente acepte la tarifa."):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
+$("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?quoteWait(r):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
+const seenA=JSON.parse(store.get("alerts")||"[]"),fr=r=>r.event_at&&Date.now()-new Date(r.event_at)<432e5;
+const al=n?data.filter(r=>fr(r)&&((r.status==="cancelado"&&r.driver_name===n)||(r.tariff_rejected_by||[]).includes(n))).map(r=>({k:r.id+":"+r.event_at,r,c:r.status==="cancelado"})).filter(a=>!seenA.includes(a.k)):[];
+if(seenAl&&al.some(a=>!seenAl.has(a.k)))beep(4,440);seenAl=new Set(al.map(a=>a.k));
+$("alerts").replaceChildren(...al.map(a=>{const c=el("div","c bad");c.append(el("b",0,a.c?"🚫 El cliente canceló el viaje":"❌ El cliente rechazó tu tarifa"),el("span",0,(a.r.client_name||"Cliente")+" · "+a.r.pickup+" → "+a.r.dropoff+(a.r.pickup_loc?" · "+a.r.pickup_loc:"")));
+const b=el("button","o","Entendido");b.onclick=()=>{store.set("alerts",JSON.stringify([...seenA,a.k].slice(-100)));loadD()};c.append(b);return c}));
 const hoy=new Date();hoy.setHours(0,0,0,0);
 const td=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&new Date(r.created_at)>=hoy):[];
 const sm=(a,m)=>a.filter(r=>!m||r.pay_method===m).reduce((x,r)=>x+Number(r.price||0),0);
@@ -297,7 +318,7 @@ const meta=Number(store.get("meta"))||50000,pct=Math.min(100,Math.round(sm(td)/m
 $("meta").textContent="Meta diaria: "+pct+"% de "+money(meta);$("mbar").style.width=pct+"%";
 renderSheet(nw);const nl=nw.filter(r=>r.id!==sheetId);
 $("hnew").textContent="🚨 Viajes entrantes"+(nl.length?" ("+nl.length+")":"");
-if(!$("new").contains(document.activeElement))$("new").replaceChildren(...(nl.length?nl.map(quote):[empty("No hay pedidos por ahora.")]));
+if(!$("new").contains(document.activeElement))$("new").replaceChildren(...(nl.length?nl.map(r=>quote(r)):[empty("No hay pedidos por ahora.")]));
 $("hist").replaceChildren(...(done.length?done.slice(-20).reverse().map(r=>{const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,money(r.price||0)+" · "+(r.pay_method||"sin registrar")+(r.rating?" · ⭐"+r.rating:"")));return c}):[empty("Sin viajes en el historial.")]))}
 function track(on){if(on&&watch==null){if(!navigator.geolocation)return $("e2").textContent="Este navegador no permite compartir ubicación.";
 watch=navigator.geolocation.watchPosition(p=>{if(Date.now()-lastSend<4000||!activeIds.length)return;lastSend=Date.now();
@@ -412,20 +433,26 @@ if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWor
 /* ---------- NAVEGACIÓN, ESTADO Y AVISO DE VIAJE NUEVO ---------- */
 const NAV={cli:["pedir","motos","msg"],cho:["viajes","act","bil","perfil"]};
 function vcli(v){for(const k of NAV.cli){$("cv-"+k).hidden=k!==v;$("nc-"+k).classList.toggle("on",k===v)}if(v==="pedir")setTimeout(()=>map.invalidateSize(),50);if(v==="motos")loadA()}
-function vcho(v){for(const k of NAV.cho){$("dv-"+k).hidden=k!==v;$("nh-"+k).classList.toggle("on",k===v)}}
+function vcho(v){for(const k of NAV.cho){$("dv-"+k).hidden=k!==v;$("nh-"+k).classList.toggle("on",k===v)}if(v==="perfil")estadoPush()}
 function renderStatus(){const on=$("av").checked;$("slab").textContent=on?"EN LÍNEA":"DESCONECTADO";$("slab").style.color=on?"var(--g)":"var(--mut)";
 $("ssub").textContent=on?"Recibís viajes nuevos":"Tocá para volver al servicio";$("sdot").className="dot"+(on?" on":"");$("sbtn").firstElementChild.textContent=on?"Desconectar":"Conectar"}
 function toggleOnline(){unlock();$("av").checked=!$("av").checked;renderStatus();$("av").onchange()}
 $("mt").value=store.get("meta")||50000;$("mt").onchange=()=>{store.set("meta",$("mt").value);loadD()};
 let sheetId=null,tleft=0,tmr=null;const dism=new Set();
 function hideSheet(){$("sheet").hidden=true;sheetId=null;clearInterval(tmr)}
-function rechazarSheet(){if(sheetId)dism.add(sheetId);hideSheet();loadD()}
+async function rechazarSheet(){const id=sheetId;if(id){dism.add(id);await db.rpc("driver_reject",{p_ride:id})}hideSheet();loadD()}
 function renderSheet(nw){const ok=document.body.dataset.r==="cho"&&!$("dapp").hidden&&$("av").checked,r=ok?nw.find(x=>!dism.has(x.id)):null;
 if(!r){hideSheet();return}
 $("sheet").hidden=false;
-if(sheetId!==r.id){sheetId=r.id;tleft=15;clearInterval(tmr);$("cd").textContent="15s";$("cbar").style.width="100%";
+if(sheetId!==r.id){sheetId=r.id;$("shtitle").textContent=r.pickup_loc?"¡Nueva solicitud en "+r.pickup_loc+"!":"¡Nueva solicitud cercana!";tleft=15;clearInterval(tmr);$("cd").textContent="15s";$("cbar").style.width="100%";
 tmr=setInterval(()=>{tleft--;$("cd").textContent=Math.max(tleft,0)+"s";$("cbar").style.width=Math.max(tleft,0)/15*100+"%";if(tleft<0){dism.add(sheetId);hideSheet();loadD()}},1000);
-$("sheetBody").replaceChildren(quote(r))}}
+$("sheetBody").replaceChildren(quote(r,true))}}
+
+async function estadoPush(){const e=$("pstat");
+if(!("Notification" in window)||!("serviceWorker" in navigator)||!("PushManager" in window)){e.textContent="Este navegador no soporta notificaciones push.";return}
+let sub=null;try{const reg=await navigator.serviceWorker.ready;sub=await reg.pushManager.getSubscription()}catch(x){}
+const per={granted:"✅ concedido",denied:"❌ bloqueado",default:"⚠️ sin responder"}[Notification.permission];
+e.textContent="Permiso: "+per+" · Suscripción en este celular: "+(sub?"✅ sí":"❌ no (tocá Activar)")+" · App: "+(matchMedia("(display-mode: standalone)").matches?"✅ instalada":"⚠️ abierta desde el navegador")}
 
 /* ---------- TIEMPO REAL ---------- */
 db.channel("rides-all").on("postgres_changes",{event:"*",schema:"public",table:"rides"},()=>{refreshC();loadD();loadA()}).subscribe();
