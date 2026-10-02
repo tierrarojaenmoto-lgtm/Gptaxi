@@ -62,6 +62,8 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 .sh{display:flex;justify-content:space-between;align-items:center}.sh b{font-size:18px;color:#ffe1a7}
 .tbar{height:6px;background:var(--c2);border-radius:99px;overflow:hidden;margin-top:12px}.tbar i{display:block;height:100%;background:var(--y);width:100%;transition:width 1s linear}
 .c.bad{background:rgba(255,180,171,.1);box-shadow:0 0 0 2px var(--err)}
+#pushc,#pushdTop,#pushd{font-size:17px;font-weight:800;min-height:56px}
+#pushhintc,#pushhintd{margin:4px 0 10px}
 </style></head>
 <body data-r="cli">
 <header><div class="hb"><div class="brand"><img src="icon-192.png" alt="GPTAXI"><div><b>GPTAXI</b><small>Mototaxi</small></div></div>
@@ -71,7 +73,8 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 
 <section id="cli">
 <div id="cv-pedir">
-<button id="pushc" hidden onclick="activarPush('cliente')">🔔 Activar avisos (suenan aunque la app esté cerrada)</button>
+<button id="pushc" onclick="activarPush('cliente')">🔔 Activar notificaciones, sonido y vibración</button>
+<p class="s" id="pushhintc">Chrome mostrará el aviso de un viaje y usará el sonido/vibración configurados en tu celular.</p>
 <div id="form">
 <label for="n">Tu nombre</label><input id="n" autocomplete="name">
 <label for="p">Referencia de recogida (opcional)</label><input id="p" placeholder="Ej: Plaza central">
@@ -110,6 +113,8 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 
 <div id="dapp" hidden>
 <div id="dv-viajes">
+<button id="pushdTop" onclick="activarPush('chofer')">🔔 Activar notificaciones, sonido y vibración</button>
+<p class="s" id="pushhintd">Permití las notificaciones de Chrome para recibir nuevos viajes aunque la app esté cerrada.</p>
 <div id="alerts"></div>
 <div class="c stat"><i class="dot" id="sdot"></i><div><b id="slab">DESCONECTADO</b><small id="ssub">Tocá para volver al servicio</small></div>
 <button id="sbtn" class="o" onclick="toggleOnline()"><span>Conectar</span><span class="material-symbols-outlined">power_settings_new</span></button></div>
@@ -132,13 +137,9 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <p class="s">Precio = base + km × tarifa por km. Podés ajustarlo en cada pedido antes de enviarlo.</p>
 <label for="mt">Meta diaria ($)</label><input id="mt" type="number" inputmode="numeric" min="0">
 <h2>Notificaciones</h2><p class="s" id="pstat"></p>
-<button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
-<button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
-
-<button class="o" onclick="probarServidor()">Probar aviso real del servidor (después bloqueá el celular)</button><p class="s" id="ptest"></p>
-<details class="c"><summary>📲 Aviso extra con la app ntfy (más seguro)</summary>
-<p class="s">1) Instalá la app <b style="display:inline">ntfy</b> desde Play Store.<br>2) Tocá "Obtener mi código" (se copia solo).<br>3) En ntfy tocá <b style="display:inline">+</b>, pegá el código y suscribite.<br>4) Tocá "Probar aviso real del servidor".</p>
-<button onclick="miCodigo()">Obtener mi código</button>
+<button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones, sonido y vibración</button>
+<button class="o" onclick="probarNotif('chofer')">Probar notificación</button>
+<button class="o" onclick="">Obtener mi código</button>
 <p class="s" id="ntop" style="word-break:break-all;user-select:all"></p><p class="s" id="ncp"></p></details>
 <button class="o" onclick="salir()">Cerrar sesión</button>
 </div>
@@ -174,7 +175,6 @@ const $=i=>document.getElementById(i);
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 const money=n=>"$"+Number(n).toLocaleString("es-AR");
-
 const T={pendiente:"Esperando tarifa del chofer…",cotizado:"Un chofer te envió su tarifa",aceptado:"Tarifa aceptada, esperando que el chofer salga",en_camino:"El chofer va en camino a buscarte",en_viaje:"Viaje en curso",finalizado:"Viaje finalizado",cancelado:"Viaje cancelado"};
 const LIVE=["pendiente","cotizado","aceptado","en_camino","en_viaje"];
 function tab(w){document.body.dataset.r=w;$("cli").hidden=w!=="cli";$("cho").hidden=w!=="cho";$("rolt").textContent=w==="cli"?"Cliente":"Chofer";
@@ -218,7 +218,7 @@ async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.i
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
 const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(ride.tariff_rejected_by||[]),ride.driver_name],event_at:new Date().toISOString()},"cotizado");
 const cancelar=()=>{if(["aceptado","en_camino"].includes(ride.status)&&!confirm("¿Cancelar el viaje? Se le avisa al chofer."))return;return upd({status:"cancelado",event_at:new Date().toISOString()})};
-async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
+async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if(data.status!==ride.status){}ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
 function renderC(){const r=ride,live=r&&LIVE.includes(r.status);
 $("form").hidden=!!live;
 if(!r){$("ride").replaceChildren();return}
@@ -297,14 +297,14 @@ if(error)return $("e2").textContent=error.message;
 const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n&&!(r.status==="cotizado"&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5)):[],nw=data.filter(r=>r.status==="pendiente"&&Date.now()-new Date(r.created_at)<18e5&&!(r.rejected_by||[]).includes(n)),
 done=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&!r.driver_hidden):[];
 data.filter(r=>r.status==="cotizado"&&r.driver_name===n&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5).forEach(r=>liberar(r.id));
-const ids=nw.map(r=>r.id);seen=new Set(ids);
+const ids=nw.map(r=>r.id);if(seen&&n&&$("av").checked&&ids.some(i=>!seen.has(i)))seen=new Set(ids);
 activeIds=mine.filter(r=>r.status!=="cotizado").map(r=>r.id);track(activeIds.length>0);
 const sum=m=>done.filter(r=>r.pay_method===m).reduce((a,r)=>a+Number(r.price||0),0),t=el("div","c");
 t.append(el("b","price",money(done.reduce((a,r)=>a+Number(r.price||0),0))),el("span",0,done.length+" viajes · Efectivo "+money(sum("efectivo"))+" · Transferencia "+money(sum("transferencia"))));$("tot").replaceChildren(t);
 $("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?quoteWait(r):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
 const seenA=JSON.parse(store.get("alerts")||"[]"),fr=r=>r.event_at&&Date.now()-new Date(r.event_at)<432e5;
 const al=n?data.filter(r=>fr(r)&&((r.status==="cancelado"&&r.driver_name===n)||(r.tariff_rejected_by||[]).includes(n))).map(r=>({k:r.id+":"+r.event_at,r,c:r.status==="cancelado"})).filter(a=>!seenA.includes(a.k)):[];
-seenAl=new Set(al.map(a=>a.k));
+if(seenAl&&al.some(a=>!seenAl.has(a.k)))seenAl=new Set(al.map(a=>a.k));
 $("alerts").replaceChildren(...al.map(a=>{const c=el("div","c bad");c.append(el("b",0,a.c?"🚫 El cliente canceló el viaje":"❌ El cliente rechazó tu tarifa"),el("span",0,(a.r.client_name||"Cliente")+" · "+a.r.pickup+" → "+a.r.dropoff+(a.r.pickup_loc?" · "+a.r.pickup_loc:"")));
 const b=el("button","o","Entendido");b.onclick=()=>{store.set("alerts",JSON.stringify([...seenA,a.k].slice(-100)));loadD()};c.append(b);return c}));
 const hoy=new Date();hoy.setHours(0,0,0,0);
@@ -405,18 +405,51 @@ if(f.pick){setPickup(f.pick);map.setView(f.pick,15);gps=!!f.gps;acc=f.acc||null}
 const VAPID="BGsIfi8ZkrDD8mglmkExXZk-_JIl4s6uBIaKLTzEFmfkflN2iFPLWY2BXNBI9VWi2L4EInr68IMoPj2dJa_pTJM";
 const cid=store.get("cid")||(()=>{const v=crypto.randomUUID();store.set("cid",v);return v})();
 const b64=u=>{const a=atob((u+"=".repeat((4-u.length%4)%4)).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from([...a].map(c=>c.charCodeAt(0)))};
-function refreshPushUI(){const ok=!("Notification" in window)||Notification.permission==="granted";$("pushc").hidden=ok;$("pushd").hidden=ok}
-async function activarPush(rol,silent){const al=m=>{if(!silent)alert(m)};
-if(!("serviceWorker" in navigator)||!("PushManager" in window))return al("Este navegador no permite notificaciones. Abrí la app desde Chrome.");
-const p=await Notification.requestPermission();refreshPushUI();
-if(p!=="granted")return al("No diste permiso. Activá las notificaciones de GPTAXI en los ajustes del celular.");
-try{const reg=await navigator.serviceWorker.ready;
-const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(VAPID)});
-const {error}=await db.rpc("save_push",{p_role:rol,p_client_id:rol==="cliente"?cid:null,p_sub:sub.toJSON()});
-if(error)return al("No se pudo activar: "+error.message);al("✅ Notificaciones activadas.")}catch(e){al("No se pudo activar: "+e.message)}}
-async function probarNotif(rol){if(!("Notification" in window)||Notification.permission!=="granted")return alert("Primero activá las notificaciones.");
-const t=rol==="cliente"?["🏍️ ¡Tu mototaxi va en camino!","Juan sale a buscarte a Plaza central.\n(Notificación de prueba)"]:["🏍️ ¡NUEVO VIAJE!","📍 Recogida: Plaza central\n🏁 Destino: Hospital\n📏 3.2 km · Cliente de prueba"];
-const reg=await navigator.serviceWorker.ready;reg.showNotification(t[0],{body:t[1],icon:"icon-192.png",badge:"badge-96.png",tag:"prueba",renotify:true,requireInteraction:true,lang:"es",vibrate:[600,200,600,200,600,200,900]})}
+function refreshPushUI(){
+  const supported=("Notification" in window)&&("serviceWorker" in navigator)&&("PushManager" in window);
+  const p=supported?Notification.permission:"unsupported";
+  const buttons=[$("pushc"),$("pushd"),$("pushdTop")].filter(Boolean);
+  const hints=[$("pushhintc"),$("pushhintd")].filter(Boolean);
+  if(!supported){
+    buttons.forEach(b=>{b.hidden=false;b.disabled=true;b.textContent="🔔 Este navegador no admite notificaciones Push"});
+    hints.forEach(h=>h.textContent="Abrí GPTAXI desde Google Chrome para activar las notificaciones.");
+    return;
+  }
+  if(p==="granted"){
+    buttons.forEach(b=>{b.hidden=true});
+    hints.forEach(h=>h.textContent="✅ Notificaciones activadas. El sonido y la vibración los controla Chrome/Android según los ajustes de notificaciones del celular.");
+  }else if(p==="denied"){
+    buttons.forEach(b=>{b.hidden=false;b.textContent="🔔 Notificaciones bloqueadas — abrir permisos de Chrome"});
+    hints.forEach(h=>h.textContent="Las notificaciones fueron bloqueadas. Activá GPTAXI en los permisos de notificaciones de Chrome/Android.");
+  }else{
+    buttons.forEach(b=>{b.hidden=false;b.textContent="🔔 Activar notificaciones, sonido y vibración"});
+    hints.forEach(h=>h.textContent="La primera vez, tocá este botón y permití las notificaciones. Chrome gestionará el sonido y la vibración.");
+  }
+}
+async function activarPush(rol,silent){
+  const al=m=>{if(!silent)alert(m)};
+  if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window))return al("Abrí GPTAXI desde Google Chrome para permitir notificaciones.");
+  if(Notification.permission==="denied"){
+    return al("Las notificaciones están bloqueadas para GPTAXI. Entrá en los permisos de notificaciones de Chrome/Android y activálas.");
+  }
+  const p=await Notification.requestPermission();
+  refreshPushUI();
+  if(p!=="granted")return al("No se concedió el permiso. Sin este permiso Chrome no puede mostrar el aviso con su sonido/vibración del sistema.");
+  try{
+    const reg=await navigator.serviceWorker.ready;
+    const sub=await reg.pushManager.getSubscription()||await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(VAPID)});
+    const {error}=await db.rpc("save_push",{p_role:rol,p_client_id:rol==="cliente"?cid:null,p_sub:sub.toJSON()});
+    if(error)return al("No se pudo activar: "+error.message);
+    refreshPushUI();
+    al("✅ Notificaciones activadas. Chrome/Android controlará el sonido y la vibración.");
+  }catch(e){al("No se pudo activar: "+e.message)}
+}
+async function probarNotif(rol){
+  if(!("Notification" in window)||Notification.permission!=="granted")return alert("Primero tocá 'Activar notificaciones, sonido y vibración'.");
+  const t=rol==="cliente"?["🏍️ ¡Tu mototaxi va en camino!","Juan sale a buscarte a Plaza central.\n(Notificación de prueba)"]:["🏍️ ¡NUEVO VIAJE!","📍 Recogida: Plaza central\n🏁 Destino: Hospital\n📏 3.2 km · Cliente de prueba"];
+  const reg=await navigator.serviceWorker.ready;
+  await reg.showNotification(t[0],{body:t[1],icon:"icon-192.png",badge:"badge-96.png",tag:"prueba-gptaxi",renotify:true,requireInteraction:true,lang:"es",silent:false,vibrate:[400,200,700,200,1000]});
+}
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.type==="push"){loadD();refreshC()}});
 document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadD();refreshC();loadA()}});
 refreshPushUI();
