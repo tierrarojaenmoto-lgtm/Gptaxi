@@ -134,7 +134,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <h2>Notificaciones</h2><p class="s" id="pstat"></p>
 <button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
 <button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
-<button class="o" onclick="unlock();beep()">Probar sonido de aviso</button>
+
 <button class="o" onclick="probarServidor()">Probar aviso real del servidor (después bloqueá el celular)</button><p class="s" id="ptest"></p>
 <details class="c"><summary>📲 Aviso extra con la app ntfy (más seguro)</summary>
 <p class="s">1) Instalá la app <b style="display:inline">ntfy</b> desde Play Store.<br>2) Tocá "Obtener mi código" (se copia solo).<br>3) En ntfy tocá <b style="display:inline">+</b>, pegá el código y suscribite.<br>4) Tocá "Probar aviso real del servidor".</p>
@@ -174,9 +174,7 @@ const $=i=>document.getElementById(i);
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
 const money=n=>"$"+Number(n).toLocaleString("es-AR");
-let AC=null;function unlock(){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume()}catch(e){}}
-document.addEventListener("click",unlock);
-function beep(n=5,f=880){try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}if(!AC)return;for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+i*.3;o.frequency.value=f;o.connect(g);g.connect(AC.destination);o.type="square";g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.start(t);o.stop(t+.25)}}
+
 const T={pendiente:"Esperando tarifa del chofer…",cotizado:"Un chofer te envió su tarifa",aceptado:"Tarifa aceptada, esperando que el chofer salga",en_camino:"El chofer va en camino a buscarte",en_viaje:"Viaje en curso",finalizado:"Viaje finalizado",cancelado:"Viaje cancelado"};
 const LIVE=["pendiente","cotizado","aceptado","en_camino","en_viaje"];
 function tab(w){document.body.dataset.r=w;$("cli").hidden=w!=="cli";$("cho").hidden=w!=="cho";$("rolt").textContent=w==="cli"?"Cliente":"Chofer";
@@ -220,7 +218,7 @@ async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.i
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
 const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(ride.tariff_rejected_by||[]),ride.driver_name],event_at:new Date().toISOString()},"cotizado");
 const cancelar=()=>{if(["aceptado","en_camino"].includes(ride.status)&&!confirm("¿Cancelar el viaje? Se le avisa al chofer."))return;return upd({status:"cancelado",event_at:new Date().toISOString()})};
-async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if((data.rejected_by||[]).length>(ride.rejected_by||[]).length)beep(2,440);if(data.status!==ride.status){if(data.status==="cotizado")beep(2,660);if(data.status==="en_camino")beep(3,988)}ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
+async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
 function renderC(){const r=ride,live=r&&LIVE.includes(r.status);
 $("form").hidden=!!live;
 if(!r){$("ride").replaceChildren();return}
@@ -299,14 +297,14 @@ if(error)return $("e2").textContent=error.message;
 const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n&&!(r.status==="cotizado"&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5)):[],nw=data.filter(r=>r.status==="pendiente"&&Date.now()-new Date(r.created_at)<18e5&&!(r.rejected_by||[]).includes(n)),
 done=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&!r.driver_hidden):[];
 data.filter(r=>r.status==="cotizado"&&r.driver_name===n&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5).forEach(r=>liberar(r.id));
-const ids=nw.map(r=>r.id);if(seen&&n&&$("av").checked&&ids.some(i=>!seen.has(i)))beep();seen=new Set(ids);
+const ids=nw.map(r=>r.id);seen=new Set(ids);
 activeIds=mine.filter(r=>r.status!=="cotizado").map(r=>r.id);track(activeIds.length>0);
 const sum=m=>done.filter(r=>r.pay_method===m).reduce((a,r)=>a+Number(r.price||0),0),t=el("div","c");
 t.append(el("b","price",money(done.reduce((a,r)=>a+Number(r.price||0),0))),el("span",0,done.length+" viajes · Efectivo "+money(sum("efectivo"))+" · Transferencia "+money(sum("transferencia"))));$("tot").replaceChildren(t);
 $("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?quoteWait(r):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
 const seenA=JSON.parse(store.get("alerts")||"[]"),fr=r=>r.event_at&&Date.now()-new Date(r.event_at)<432e5;
 const al=n?data.filter(r=>fr(r)&&((r.status==="cancelado"&&r.driver_name===n)||(r.tariff_rejected_by||[]).includes(n))).map(r=>({k:r.id+":"+r.event_at,r,c:r.status==="cancelado"})).filter(a=>!seenA.includes(a.k)):[];
-if(seenAl&&al.some(a=>!seenAl.has(a.k)))beep(4,440);seenAl=new Set(al.map(a=>a.k));
+seenAl=new Set(al.map(a=>a.k));
 $("alerts").replaceChildren(...al.map(a=>{const c=el("div","c bad");c.append(el("b",0,a.c?"🚫 El cliente canceló el viaje":"❌ El cliente rechazó tu tarifa"),el("span",0,(a.r.client_name||"Cliente")+" · "+a.r.pickup+" → "+a.r.dropoff+(a.r.pickup_loc?" · "+a.r.pickup_loc:"")));
 const b=el("button","o","Entendido");b.onclick=()=>{store.set("alerts",JSON.stringify([...seenA,a.k].slice(-100)));loadD()};c.append(b);return c}));
 const hoy=new Date();hoy.setHours(0,0,0,0);
@@ -436,7 +434,7 @@ function vcli(v){for(const k of NAV.cli){$("cv-"+k).hidden=k!==v;$("nc-"+k).clas
 function vcho(v){for(const k of NAV.cho){$("dv-"+k).hidden=k!==v;$("nh-"+k).classList.toggle("on",k===v)}if(v==="perfil")estadoPush()}
 function renderStatus(){const on=$("av").checked;$("slab").textContent=on?"EN LÍNEA":"DESCONECTADO";$("slab").style.color=on?"var(--g)":"var(--mut)";
 $("ssub").textContent=on?"Recibís viajes nuevos":"Tocá para volver al servicio";$("sdot").className="dot"+(on?" on":"");$("sbtn").firstElementChild.textContent=on?"Desconectar":"Conectar"}
-function toggleOnline(){unlock();$("av").checked=!$("av").checked;renderStatus();$("av").onchange()}
+function toggleOnline(){$("av").checked=!$("av").checked;renderStatus();$("av").onchange()}
 $("mt").value=store.get("meta")||50000;$("mt").onchange=()=>{store.set("meta",$("mt").value);loadD()};
 let sheetId=null,tleft=0,tmr=null;const dism=new Set();
 function hideSheet(){$("sheet").hidden=true;sheetId=null;clearInterval(tmr)}
