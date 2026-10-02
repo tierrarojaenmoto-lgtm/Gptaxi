@@ -1,6 +1,6 @@
 {
-  "name": "Mototaxi",
-  "short_name": "Mototaxi",
+  "name": "GPTAXI",
+  "short_name": "GPTAXI",
   "description": "Pedí tu mototaxi desde el celular",
   "lang": "es",
   "start_url": "./",

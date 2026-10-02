@@ -71,6 +71,11 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <div id="dapp" hidden>
 <button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
 <button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
+<button class="o" onclick="probarServidor()">Probar aviso real del servidor (después bloqueá el celular)</button><p class="s" id="ptest"></p>
+<details class="c"><summary><b>📲 Aviso extra con la app ntfy (más seguro)</b></summary>
+<p class="s">1) Instalá la app <b>ntfy</b> desde Play Store.<br>2) Tocá "Obtener mi código" (se copia solo).<br>3) En ntfy tocá <b>+</b>, pegá el código y suscribite.<br>4) Tocá "Probar aviso real del servidor".</p>
+<button onclick="miCodigo()">Obtener mi código</button>
+<p class="s" id="ntop" style="word-break:break-all;user-select:all"></p><p class="s" id="ncp"></p></details>
 <label for="cn">Tu nombre</label><input id="cn" readonly>
 <label for="cm">Modelo de tu moto</label><input id="cm" placeholder="Ej: Honda Wave 110">
 <label for="al">Tu alias para transferencias</label><input id="al" placeholder="Ej: gustavo.mototaxi" autocapitalize="none" autocomplete="off">
@@ -91,7 +96,7 @@ button.o{background:transparent;border:2px solid var(--line);color:inherit;margi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script>
-const db=supabase.createClient("https://vffcjijwrgerdyujvlcf.supabase.co","sb_publishable_rv-VVSkeii8-_0pfS-EZCw_d2XkD1-Q");
+const db=supabase.createClient("https://vffcjijwrgerdyujvlcf.supabase.co","sb_publishable_rv-VVSkeii8-_0pfS-EZCw_d2XkD1-Q",{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 const $=i=>document.getElementById(i);
 const el=(t,c,x)=>{const e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e};
 const store={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}},del:k=>{try{localStorage.removeItem(k)}catch(e){}}};
@@ -193,7 +198,7 @@ async function borrarHist(){const n=$("cn").value.trim();if(!n||!confirm("¿Borr
 await db.from("rides").update({driver_hidden:true}).eq("driver_name",n).eq("status","finalizado");loadD()}
 let seen=null;
 async function loadD(){if(!uid||!me||!me.active)return;const n=$("cn").value.trim();
-const {data:dm}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();
+const {data:dm,error:de}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();if(de)return;
 if(!dm||!dm.active){track(false);return sesion()}
 db.from("drivers").update({alias:$("al").value.trim(),moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
 const {data,error}=await db.from("rides").select().order("created_at");
@@ -213,18 +218,44 @@ db.from("rides").update({driver_lat:p.coords.latitude,driver_lng:p.coords.longit
 ()=>$("e2").textContent="Activá el GPS y permití la ubicación para que el cliente te vea.",{enableHighAccuracy:true})}
 else if(!on&&watch!=null){navigator.geolocation.clearWatch(watch);watch=null}}
 
+/* ---------- WHATSAPP Y PRUEBA DEL SERVIDOR ---------- */
+async function probarServidor(){const t=$("ptest");
+if(!("Notification" in window)||Notification.permission!=="granted"){t.textContent="Primero tocá 'Activar notificaciones de viajes'.";return}
+t.textContent="Enviando prueba…";await activarPush("chofer",1);
+const {error}=await db.rpc("test_push");if(error){t.textContent="No se pudo probar: "+error.message;return}
+t.textContent="Prueba enviada. Bloqueá el celular y esperá unos segundos…";
+setTimeout(async()=>{const {data}=await db.rpc("last_push_status");t.textContent="Respuesta del servidor: "+data},6000)}
+
+async function miCodigo(){if(!uid)return;$("e2").textContent="";
+const r=await db.from("driver_private").select("ntfy_topic").eq("user_id",uid).maybeSingle();let t=r.data&&r.data.ntfy_topic;
+if(!t){t="gptaxi-"+crypto.randomUUID().replace(/-/g,"");const {error}=await db.from("driver_private").upsert({user_id:uid,ntfy_topic:t});if(error)return $("e2").textContent="No se pudo crear el código: "+error.message}
+$("ntop").textContent=t;try{await navigator.clipboard.writeText(t);$("ncp").textContent="✅ Código copiado. Pegalo en la app ntfy."}catch(e){$("ncp").textContent="Copiá el código de arriba a mano."}}
+
 /* ---------- LOGIN, MEMBRESÍA Y ADMIN ---------- */
 let me=null,uid=null,isAdm=false;
-async function sesion(){track(false);const {data:{session}}=await db.auth.getSession();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+db.auth.onAuthStateChange(ev=>store.set("ae",ev+" · "+new Date().toLocaleString("es-AR")));
+const tr=e=>e&&(/Retryable/i.test(e.name||"")||!e.status||e.status>=500);
+addEventListener("online",()=>{if(!uid)sesion()});
+let sesBusy=false;
+async function sesion(){if(sesBusy)return;sesBusy=true;try{await sesion0()}finally{sesBusy=false}}
+async function sesion0(){track(false);
+let session=null,err=null;
+for(let i=0;i<3;i++){const r=await db.auth.getSession();session=r.data.session;err=r.error;if(session||!tr(err))break;await new Promise(x=>setTimeout(x,1500))}
 for(const k of["login","wait","admin","dapp","out"])$(k).hidden=true;me=null;uid=null;isAdm=false;
-if(!session){$("login").hidden=false;return}
+if(!session&&tr(err)){$("e2").textContent="Reconectando tu sesión… ("+(err.message||"sin internet")+")";return void setTimeout(sesion,3000)}
+if(!session){$("login").hidden=false;$("e2").textContent=(err?"Sesión no válida: "+err.message+". ":"")+(store.get("ae")?"Último evento: "+store.get("ae"):"");return}
 uid=session.user.id;$("out").hidden=false;
-isAdm=!!(await db.rpc("is_admin")).data;
-if(isAdm){$("admin").hidden=false;return loadAdm()}
-let {data}=await db.from("drivers").select().eq("user_id",uid).maybeSingle();
-if(!data){const m=session.user.user_metadata||{};data=(await db.from("drivers").insert({user_id:uid,name:m.name||session.user.email,moto:m.moto||""}).select().single()).data}
-if(!data){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta no está habilitada.";return}
+const adm=await db.rpc("is_admin");if(adm.error){$("e2").textContent="Sin conexión. Reintentando…";return void setTimeout(sesion,3000)}
+isAdm=!!adm.data;if(isAdm){$("admin").hidden=false;return loadAdm()}
+let {data,error}=await db.from("drivers").select().eq("user_id",uid).maybeSingle();
+if(error){$("e2").textContent="Sin conexión. Reintentando…";return void setTimeout(sesion,3000)}
+if(!data){const m=session.user.user_metadata||{},ins=await db.from("drivers").insert({user_id:uid,name:m.name||session.user.email,moto:m.moto||""}).select().single();
+if(ins.error&&ins.error.code==="23503"){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta ya no está habilitada.";return}
+data=ins.data;if(!data){const a=await db.from("drivers").select().eq("user_id",uid).maybeSingle();data=a.data}
+if(!data){$("e2").textContent="No se pudo cargar tu cuenta. Reintentando…";return void setTimeout(sesion,3000)}}
 me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;if(me.alias)$("al").value=me.alias;
+$("e2").textContent="";
 if(!me.active){$("wait").hidden=false;return}
 $("dapp").hidden=false;loadD();refreshPushUI();if(window.Notification&&Notification.permission==="granted")activarPush("chofer",1)}
 async function entrar(){$("e2").textContent="";const {error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
@@ -281,6 +312,7 @@ async function probarNotif(rol){if(!("Notification" in window)||Notification.per
 const t=rol==="cliente"?["🏍️ ¡Tu mototaxi va en camino!","Juan sale a buscarte a Plaza central.\n(Notificación de prueba)"]:["🏍️ ¡NUEVO VIAJE!","📍 Recogida: Plaza central\n🏁 Destino: Hospital\n📏 3.2 km · Cliente de prueba"];
 const reg=await navigator.serviceWorker.ready;reg.showNotification(t[0],{body:t[1],icon:"icon-192.png",badge:"badge-96.png",tag:"prueba",renotify:true,requireInteraction:true,lang:"es",vibrate:[600,200,600,200,600,200,900]})}
 if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.type==="push"){loadD();refreshC()}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadD();refreshC();loadA()}});
 refreshPushUI();
 
 /* ---------- INSTALAR COMO APP ---------- */
