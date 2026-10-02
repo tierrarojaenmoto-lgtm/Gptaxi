@@ -138,7 +138,9 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <label for="mt">Meta diaria ($)</label><input id="mt" type="number" inputmode="numeric" min="0">
 <h2>Notificaciones</h2><p class="s" id="pstat"></p>
 <button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones, sonido y vibración</button>
-<button class="o" onclick="probarNotif('chofer')">Probar notificación</button>
+<button class="o" onclick="probarNotif('chofer')">Probar notificación local de Chrome</button>
+<button class="o" onclick="probarServidor()">🔔 Probar notificación REAL desde Supabase</button>
+<p class="s" id="ptest"></p>
 <button class="o" onclick="">Obtener mi código</button>
 <p class="s" id="ntop" style="word-break:break-all;user-select:all"></p><p class="s" id="ncp"></p></details>
 <button class="o" onclick="salir()">Cerrar sesión</button>
@@ -326,11 +328,12 @@ else if(!on&&watch!=null){navigator.geolocation.clearWatch(watch);watch=null}}
 
 /* ---------- WHATSAPP Y PRUEBA DEL SERVIDOR ---------- */
 async function probarServidor(){const t=$("ptest");
-if(!("Notification" in window)||Notification.permission!=="granted"){t.textContent="Primero tocá 'Activar notificaciones de viajes'.";return}
-t.textContent="Enviando prueba…";await activarPush("chofer",1);
-const {error}=await db.rpc("test_push");if(error){t.textContent="No se pudo probar: "+error.message;return}
-t.textContent="Prueba enviada. Bloqueá el celular y esperá unos segundos…";
-setTimeout(async()=>{const {data}=await db.rpc("last_push_status");t.textContent="Respuesta del servidor: "+data},6000)}
+if(!("Notification" in window)||Notification.permission!=="granted"){t.textContent="Primero tocá 'Activar notificaciones, sonido y vibración'.";return}
+t.textContent="Registrando este celular y enviando prueba REAL desde Supabase…";
+await activarPush("chofer",1);
+const {data,error}=await db.rpc("test_push");
+if(error){t.textContent="❌ La prueba del servidor falló: "+error.message;return}
+t.textContent="✅ Supabase recibió la orden de prueba ("+(data||"enviada")+"). Bloqueá el celular y esperá la notificación de Chrome."}
 
 async function miCodigo(){if(!uid)return;$("e2").textContent="";
 const r=await db.from("driver_private").select("ntfy_topic").eq("user_id",uid).maybeSingle();let t=r.data&&r.data.ntfy_topic;
