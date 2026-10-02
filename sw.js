@@ -1,5 +1,5 @@
 // Service worker: guarda lo básico de la app y muestra las notificaciones push (con la app cerrada o el celular bloqueado)
-const V="gptaxi-v5",BASE=["./","index.html","manifest.json","icon-192.png","icon-512.png","badge-96.png"];
+const V="gptaxi-v6",BASE=["./","index.html","manifest.json","icon-192.png","icon-512.png","badge-96.png"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(BASE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
@@ -8,7 +8,7 @@ self.addEventListener("fetch",e=>{
 });
 self.addEventListener("push",e=>{let d={};try{d=e.data.json()}catch(_){}
   e.waitUntil((async()=>{
-    await self.registration.showNotification(d.title||"GPTAXI",{body:d.body||"",icon:"icon-192.png",badge:"badge-96.png",tag:d.tag||"gptaxi",renotify:true,requireInteraction:true,silent:false,lang:"es",timestamp:Date.now(),vibrate:[600,200,600,200,600,200,900],actions:[{action:"abrir",title:"Abrir GPTAXI"}],data:{url:d.url||"./"}});
+    await self.registration.showNotification(d.title||"GPTAXI",{body:d.body||"",icon:"icon-192.png",badge:"badge-96.png",tag:d.tag||"gptaxi",renotify:false,requireInteraction:true,lang:"es",timestamp:Date.now(),vibrate:[600,200,600,200,600,200,900],actions:[{action:"abrir",title:"Abrir GPTAXI"}],data:{url:d.url||"./"}});
     (await clients.matchAll({type:"window",includeUncontrolled:true})).forEach(c=>c.postMessage({type:"push",kind:d.kind}));
   })())});
 self.addEventListener("notificationclick",e=>{e.notification.close();
