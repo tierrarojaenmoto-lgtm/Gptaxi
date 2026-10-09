@@ -65,7 +65,7 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 </style></head>
 <body data-r="cli">
 <header><div class="hb"><div class="brand"><img src="icon-192.png" alt="GPTAXI"><div><b>GPTAXI</b><small>Mototaxi</small></div></div>
-<button id="rolbtn" onclick="rol()" aria-label="Cambiar rol"><i class="dot on"></i><span id="rolt">Cliente</span><span class="material-symbols-outlined">swap_horiz</span></button></div></header>
+</div></header>
 <main>
 <button id="inst" hidden style="margin:0 0 4px">📲 Instalar la app en tu celular</button>
 
@@ -92,78 +92,11 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <button onclick="enviarMsg()">Enviar mensaje</button><div class="err" id="mm"></div>
 <button class="o" onclick="probarNotif('cliente')">Probar notificación en este celular</button></div>
 </section>
-
-<section id="cho" hidden>
-<div id="login" hidden>
-<p class="s">Ingresá con tu cuenta de chofer.</p>
-<label for="em">Correo</label><input id="em" type="email" autocomplete="email">
-<label for="pw">Contraseña (mínimo 6 caracteres)</label><input id="pw" type="password" autocomplete="current-password">
-<div id="reg" hidden><label for="rn">Tu nombre</label><input id="rn" autocomplete="name"><label for="rm">Modelo de tu moto</label><input id="rm" placeholder="Ej: Honda Wave 110"></div>
-<button onclick="entrar()">Entrar</button><button class="o" onclick="registro()">Crear cuenta de chofer</button>
-</div>
-<div id="wait" hidden><div class="c"><b>Membresía no activa</b><span>Tu cuenta está registrada pero todavía no fue activada. Contactá al administrador para abonar la membresía.</span></div></div>
-<div id="admin" hidden><h2>Viajes facturados</h2>
-<label for="rp">Período</label><select id="rp"><option value="hoy">Hoy</option><option value="mes" selected>Este mes</option><option value="todo">Todo</option></select>
-<div id="fact"></div>
-<h2>Mensajes de clientes</h2><div id="msgs"></div>
-<h2>Choferes</h2><div id="dl"></div></div>
-
-<div id="dapp" hidden>
-<div id="dv-viajes">
-<div id="alerts"></div>
-<div class="c stat"><i class="dot" id="sdot"></i><div><b id="slab">DESCONECTADO</b><small id="ssub">Tocá para volver al servicio</small></div>
-<button id="sbtn" class="o" onclick="toggleOnline()"><span>Conectar</span><span class="material-symbols-outlined">power_settings_new</span></button></div>
-<input id="av" type="checkbox" hidden>
-<div class="c"><span class="lbl">Ganancias de hoy</span><b class="price" id="gh">$0</b>
-<div class="grid2"><div><small>Completados</small><b id="ch">0 viajes</b></div><div><small>Cobrado</small><b id="gp" style="font-size:13px">–</b></div></div>
-<span class="lbl" id="meta" style="display:block;margin-top:14px">Meta diaria</span><div class="bar"><i id="mbar"></i></div></div>
-<h2 id="hnew" style="color:var(--y)">🚨 Viajes entrantes</h2><div id="new"></div>
-<h2>🏍️ Viajes en curso</h2><div id="mine"></div>
-</div>
-<div id="dv-act" hidden><h2 style="margin-top:6px">Historial</h2><div id="hist"></div><button class="o" onclick="borrarHist()">Borrar historial</button></div>
-<div id="dv-bil" hidden><h2 style="margin-top:6px">Lo recaudado</h2><div id="tot"></div></div>
-<div id="dv-perfil" hidden><h2 style="margin-top:6px">Perfil</h2>
-<label for="cn">Tu nombre</label><input id="cn" readonly>
-<label for="cm">Modelo de tu moto</label><input id="cm" placeholder="Ej: Honda Wave 110">
-<label for="al">Tu alias para transferencias</label><input id="al" placeholder="Ej: gustavo.mototaxi" autocapitalize="none" autocomplete="off">
-<h2>Mis tarifas (ejemplo, editalas)</h2>
-<div class="row"><div><label for="tb">Base ($)</label><input id="tb" type="number" inputmode="numeric" min="0"></div>
-<div><label for="tk">Por km ($)</label><input id="tk" type="number" inputmode="numeric" min="0"></div></div>
-<p class="s">Precio = base + km × tarifa por km. Podés ajustarlo en cada pedido antes de enviarlo.</p>
-<label for="mt">Meta diaria ($)</label><input id="mt" type="number" inputmode="numeric" min="0">
-<h2>Notificaciones</h2><p class="s" id="pstat"></p>
-<button id="pushd" hidden onclick="activarPush('chofer')">🔔 Activar notificaciones de viajes (suenan con la app cerrada)</button>
-<button class="o" onclick="probarNotif('chofer')">Probar notificación y sonido</button>
-<button class="o" onclick="probarServidor()">Probar aviso real del servidor (después bloqueá el celular)</button><p class="s" id="ptest"></p>
-<details class="c"><summary>📲 Aviso extra con la app ntfy (más seguro)</summary>
-<p class="s">1) Instalá la app <b style="display:inline">ntfy</b> desde Play Store.<br>2) Tocá "Obtener mi código" (se copia solo).<br>3) En ntfy tocá <b style="display:inline">+</b>, pegá el código y suscribite.<br>4) Tocá "Probar aviso real del servidor".</p>
-<button onclick="miCodigo()">Obtener mi código</button>
-<p class="s" id="ntop" style="word-break:break-all;user-select:all"></p><p class="s" id="ncp"></p></details>
-<button class="o" onclick="salir()">Cerrar sesión</button>
-</div>
-</div>
-<button class="o" id="out" onclick="salir()" hidden>Cerrar sesión</button>
-<div class="err" id="e2"></div>
-</section>
 </main>
-
-<div class="sheet" id="sheet" hidden><div class="sheetin">
-<div class="sh"><span class="st urgent" id="shtitle">¡Nueva solicitud cercana!</span><b>⏱ <span id="cd">15s</span></b></div>
-<div id="sheetBody"></div>
-<div class="tbar"><i id="cbar"></i></div>
-<button class="o" onclick="rechazarSheet()">Rechazar</button>
-</div></div>
-
 <nav class="bn" id="navcli">
 <button id="nc-pedir" class="on" onclick="vcli('pedir')"><span class="material-symbols-outlined">pin_drop</span>Pedir</button>
 <button id="nc-motos" onclick="vcli('motos')"><span class="material-symbols-outlined">two_wheeler</span>Motos</button>
 <button id="nc-msg" onclick="vcli('msg')"><span class="material-symbols-outlined">chat</span>Mensajes</button>
-</nav>
-<nav class="bn" id="navcho" hidden>
-<button id="nh-viajes" class="on" onclick="vcho('viajes')"><span class="material-symbols-outlined">two_wheeler</span>Viajes</button>
-<button id="nh-act" onclick="vcho('act')"><span class="material-symbols-outlined">receipt_long</span>Actividad</button>
-<button id="nh-bil" onclick="vcho('bil')"><span class="material-symbols-outlined">account_balance_wallet</span>Billetera</button>
-<button id="nh-perfil" onclick="vcho('perfil')"><span class="material-symbols-outlined">person</span>Perfil</button>
 </nav>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -178,10 +111,6 @@ const reg=await navigator.serviceWorker.ready;if(tag&&(await reg.getNotification
 await reg.showNotification(title,{body,icon:"icon-192.png",badge:"badge-96.png",tag:tag||undefined,requireInteraction:true,lang:"es",vibrate:[600,200,600,200,600,200,900]})}catch(e){}}
 const T={pendiente:"Esperando tarifa del chofer…",cotizado:"Un chofer te envió su tarifa",aceptado:"Tarifa aceptada, esperando que el chofer salga",en_camino:"El chofer va en camino a buscarte",en_viaje:"Viaje en curso",finalizado:"Viaje finalizado",cancelado:"Viaje cancelado"};
 const LIVE=["pendiente","cotizado","aceptado","en_camino","en_viaje"];
-function tab(w){document.body.dataset.r=w;$("cli").hidden=w!=="cli";$("cho").hidden=w!=="cho";$("rolt").textContent=w==="cli"?"Cliente":"Chofer";
-if(w==="cli"){hideSheet();setTimeout(()=>map.invalidateSize(),50)}else sesion()}
-function rol(){tab(document.body.dataset.r==="cli"?"cho":"cli")}
-
 /* ---------- CLIENTE ---------- */
 const map=L.map("map").setView([-25.97,-54.57],14);
 L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(map);
@@ -252,146 +181,6 @@ async function loadA(){const [a,b]=await Promise.all([db.from("drivers").select(
 rat={};(b.data||[]).forEach(r=>{const x=rat[r.driver_name]||(rat[r.driver_name]={s:0,n:0});x.s+=r.rating;x.n++});
 const d=a.data||[];availNames=d.map(x=>x.name);$("avail").replaceChildren(...(d.length?d.map(x=>{const c=el("div","c");c.append(el("b",0,x.name),el("span",0,(x.moto||"Moto sin modelo")+" · "+stars(x.name)));return c}):[el("p","s","No hay motos disponibles ahora.")]))}
 
-/* ---------- CHOFER ---------- */
-let watch=null,lastSend=0,activeIds=[];
-$("cn").value=store.get("chofer")||"";$("tb").value=store.get("tb")||1000;$("tk").value=store.get("tk")||800;
-$("cn").onchange=()=>{store.set("chofer",$("cn").value);loadD()};
-$("cm").value=store.get("moto")||"";$("av").checked=store.get("av")==="1";
-$("cm").onchange=()=>{store.set("moto",$("cm").value);loadD()};$("av").onchange=()=>{store.set("av",$("av").checked?"1":"0");loadD()};
-$("tb").oninput=$("tk").oninput=()=>{store.set("tb",$("tb").value);store.set("tk",$("tk").value);loadD()};
-async function setS(id,status,extra={}){const n=$("cn").value.trim();$("e2").textContent="";
-if(status==="cotizado"&&!n)return $("e2").textContent="Escribí tu nombre para enviar la tarifa.";
-const u={status,...extra};if(status==="cotizado"){u.driver_name=n;u.driver_alias=$("al").value.trim();u.quoted_at=new Date().toISOString()}
-let q=db.from("rides").update(u).eq("id",id);if(status==="cotizado")q=q.eq("status","pendiente");
-const {data,error}=await q.select();
-if(error)$("e2").textContent=error.message;else if(!data.length)$("e2").textContent="Ese pedido ya no está disponible.";
-loadD()}
-function card(r,label,next,info){const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,"Cliente: "+(r.client_name||"sin nombre")+(r.distance_km!=null?" · ≈ "+r.distance_km+" km":"")));
-if(r.pickup_loc||r.dropoff_loc)c.prepend(el("span","st urgent","🗺️ "+[r.pickup_loc,r.dropoff_loc&&r.dropoff_loc!==r.pickup_loc?"→ "+r.dropoff_loc:""].filter(Boolean).join(" ")));
-if(r.price!=null)c.append(el("br"),el("b",0,"Tarifa: "+money(r.price)));
-if(r.pickup_exact)c.append(el("br"),el("b",0,"📍 Ubicación exacta por GPS"+(r.pickup_accuracy?" (±"+r.pickup_accuracy+" m)":"")));
-if(r.pickup_lat!=null){c.append(el("br"));const a=el("a",0,"Abrir recogida en Google Maps");a.href="https://www.google.com/maps/dir/?api=1&destination="+r.pickup_lat+","+r.pickup_lng;a.target="_blank";a.rel="noopener";c.append(a)}
-if(info)c.append(el("p","s",info));
-if(label){const b=el("button",0,label);b.onclick=()=>setS(r.id,next);c.append(b)}return c}
-function quote(r,nr){const c=card(r);c.className="c alert";c.prepend(el("span","st urgent","🚨 NUEVO VIAJE"));const i=el("input");i.type="number";i.inputMode="numeric";i.min=0;i.id="pr"+r.id;
-i.value=Math.round((+$("tb").value||0)+(+$("tk").value||0)*(r.distance_km||0));
-const l=el("label",0,"Tarifa a cobrar ($)");l.htmlFor=i.id;
-const b=el("button",0,"Enviar tarifa al cliente");b.onclick=()=>setS(r.id,"cotizado",{price:+i.value||0});
-c.append(l,i,b);
-if(!nr){const rj=el("button","o","Rechazar");rj.onclick=async()=>{dism.add(r.id);await db.rpc("driver_reject",{p_ride:r.id});loadD()};c.append(rj)}return c}
-const empty=t=>el("p","s",t);
-const liberar=id=>db.from("rides").update({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null}).eq("id",id).eq("status","cotizado");
-async function retirar(id){await liberar(id);loadD()}
-function quoteWait(r){const m=r.quoted_at?Math.max(0,Math.round((Date.now()-new Date(r.quoted_at))/6e4)):null;
-const c=card(r,0,0,"Esperando que el cliente acepte la tarifa"+(m!=null?" · hace "+m+" min":"")+".");
-const b=el("button","o","Retirar tarifa");b.onclick=()=>retirar(r.id);c.append(b);return c}
-function fin(r){const c=card(r);for(const [t,m] of [["Finalizar: cobró en efectivo","efectivo"],["Finalizar: cobró por transferencia","transferencia"]]){const b=el("button",m==="efectivo"?0:"o",t);b.onclick=()=>setS(r.id,"finalizado",{pay_method:m});c.append(b)}return c}
-async function borrarHist(){const n=$("cn").value.trim();if(!n||!confirm("¿Borrar tu historial y el total recaudado?"))return;
-await db.from("rides").update({driver_hidden:true}).eq("driver_name",n).eq("status","finalizado");loadD()}
-let seen=null,seenAl=null;
-async function loadD(){if(!uid||!me||!me.active)return;const n=$("cn").value.trim();
-const {data:dm,error:de}=await db.from("drivers").select("active").eq("user_id",uid).maybeSingle();if(de)return;
-if(!dm||!dm.active){track(false);return sesion()}
-db.from("drivers").update({alias:$("al").value.trim(),moto:$("cm").value.trim(),available:$("av").checked,last_seen:new Date().toISOString()}).eq("user_id",uid).then(()=>{});
-const {data,error}=await db.from("rides").select().order("created_at");
-if(error)return $("e2").textContent=error.message;
-const act=["cotizado","aceptado","en_camino","en_viaje"],mine=n?data.filter(r=>act.includes(r.status)&&r.driver_name===n&&!(r.status==="cotizado"&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5)):[],nw=data.filter(r=>r.status==="pendiente"&&Date.now()-new Date(r.created_at)<18e5&&!(r.rejected_by||[]).includes(n)),
-done=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&!r.driver_hidden):[];
-data.filter(r=>r.status==="cotizado"&&r.driver_name===n&&Date.now()-new Date(r.quoted_at||r.created_at)>6e5).forEach(r=>liberar(r.id));
-const ids=nw.map(r=>r.id);{const nu=seen&&n&&$("av").checked?nw.find(r=>!seen.has(r.id)):null;if(nu)notif("🏍️ ¡NUEVO VIAJE!"+(nu.pickup_loc?" · "+nu.pickup_loc:""),"📍 "+nu.pickup+"\n🏁 "+nu.dropoff,"viaje-"+nu.id)}seen=new Set(ids);
-activeIds=mine.filter(r=>r.status!=="cotizado").map(r=>r.id);track(activeIds.length>0);
-const sum=m=>done.filter(r=>r.pay_method===m).reduce((a,r)=>a+Number(r.price||0),0),t=el("div","c");
-t.append(el("b","price",money(done.reduce((a,r)=>a+Number(r.price||0),0))),el("span",0,done.length+" viajes · Efectivo "+money(sum("efectivo"))+" · Transferencia "+money(sum("transferencia"))));$("tot").replaceChildren(t);
-$("mine").replaceChildren(...(mine.length?mine.map(r=>r.status==="cotizado"?quoteWait(r):r.status==="aceptado"?card(r,"Voy en camino","en_camino"):r.status==="en_camino"?card(r,"Iniciar viaje","en_viaje"):fin(r)):[empty("Sin viajes activos.")]));
-const seenA=JSON.parse(store.get("alerts")||"[]"),fr=r=>r.event_at&&Date.now()-new Date(r.event_at)<432e5;
-const al=n?data.filter(r=>fr(r)&&((r.status==="cancelado"&&r.driver_name===n)||(r.tariff_rejected_by||[]).includes(n))).map(r=>({k:r.id+":"+r.event_at,r,c:r.status==="cancelado"})).filter(a=>!seenA.includes(a.k)):[];
-{const na=seenAl?al.find(a=>!seenAl.has(a.k)):null;if(na)notif(na.c?"🚫 El cliente canceló el viaje":"❌ El cliente rechazó tu tarifa",(na.r.client_name||"Cliente")+" · "+na.r.pickup+" → "+na.r.dropoff,(na.c?"cx-":"no-")+na.r.id)}seenAl=new Set(al.map(a=>a.k));
-$("alerts").replaceChildren(...al.map(a=>{const c=el("div","c bad");c.append(el("b",0,a.c?"🚫 El cliente canceló el viaje":"❌ El cliente rechazó tu tarifa"),el("span",0,(a.r.client_name||"Cliente")+" · "+a.r.pickup+" → "+a.r.dropoff+(a.r.pickup_loc?" · "+a.r.pickup_loc:"")));
-const b=el("button","o","Entendido");b.onclick=()=>{store.set("alerts",JSON.stringify([...seenA,a.k].slice(-100)));loadD()};c.append(b);return c}));
-const hoy=new Date();hoy.setHours(0,0,0,0);
-const td=n?data.filter(r=>r.status==="finalizado"&&r.driver_name===n&&new Date(r.created_at)>=hoy):[];
-const sm=(a,m)=>a.filter(r=>!m||r.pay_method===m).reduce((x,r)=>x+Number(r.price||0),0);
-$("gh").textContent=money(sm(td));$("ch").textContent=td.length+(td.length===1?" viaje":" viajes");
-$("gp").textContent="Ef. "+money(sm(td,"efectivo"))+" · Tr. "+money(sm(td,"transferencia"));
-const meta=Number(store.get("meta"))||50000,pct=Math.min(100,Math.round(sm(td)/meta*100));
-$("meta").textContent="Meta diaria: "+pct+"% de "+money(meta);$("mbar").style.width=pct+"%";
-renderSheet(nw);const nl=nw.filter(r=>r.id!==sheetId);
-$("hnew").textContent="🚨 Viajes entrantes"+(nl.length?" ("+nl.length+")":"");
-if(!$("new").contains(document.activeElement))$("new").replaceChildren(...(nl.length?nl.map(r=>quote(r)):[empty("No hay pedidos por ahora.")]));
-$("hist").replaceChildren(...(done.length?done.slice(-20).reverse().map(r=>{const c=el("div","c");c.append(el("b",0,r.pickup+" → "+r.dropoff),el("span",0,money(r.price||0)+" · "+(r.pay_method||"sin registrar")+(r.rating?" · ⭐"+r.rating:"")));return c}):[empty("Sin viajes en el historial.")]))}
-function track(on){if(on&&watch==null){if(!navigator.geolocation)return $("e2").textContent="Este navegador no permite compartir ubicación.";
-watch=navigator.geolocation.watchPosition(p=>{if(Date.now()-lastSend<4000||!activeIds.length)return;lastSend=Date.now();
-db.from("rides").update({driver_lat:p.coords.latitude,driver_lng:p.coords.longitude}).in("id",activeIds).then(()=>{})},
-()=>$("e2").textContent="Activá el GPS y permití la ubicación para que el cliente te vea.",{enableHighAccuracy:true})}
-else if(!on&&watch!=null){navigator.geolocation.clearWatch(watch);watch=null}}
-
-/* ---------- WHATSAPP Y PRUEBA DEL SERVIDOR ---------- */
-async function probarServidor(){const t=$("ptest");
-if(!("Notification" in window)||Notification.permission!=="granted"){t.textContent="Primero tocá 'Activar notificaciones de viajes'.";return}
-t.textContent="Enviando prueba…";await activarPush("chofer",1);
-const {error}=await db.rpc("test_push");if(error){t.textContent="No se pudo probar: "+error.message;return}
-t.textContent="Prueba enviada. Bloqueá el celular y esperá unos segundos…";
-setTimeout(async()=>{const {data}=await db.rpc("last_push_status");t.textContent="Respuesta del servidor: "+data},6000)}
-
-async function miCodigo(){if(!uid)return;$("e2").textContent="";
-const r=await db.from("driver_private").select("ntfy_topic").eq("user_id",uid).maybeSingle();let t=r.data&&r.data.ntfy_topic;
-if(!t){t="gptaxi-"+crypto.randomUUID().replace(/-/g,"");const {error}=await db.from("driver_private").upsert({user_id:uid,ntfy_topic:t});if(error)return $("e2").textContent="No se pudo crear el código: "+error.message}
-$("ntop").textContent=t;try{await navigator.clipboard.writeText(t);$("ncp").textContent="✅ Código copiado. Pegalo en la app ntfy."}catch(e){$("ncp").textContent="Copiá el código de arriba a mano."}}
-
-/* ---------- LOGIN, MEMBRESÍA Y ADMIN ---------- */
-let me=null,uid=null,isAdm=false;
-try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
-db.auth.onAuthStateChange(ev=>store.set("ae",ev+" · "+new Date().toLocaleString("es-AR")));
-const tr=e=>e&&(/Retryable/i.test(e.name||"")||!e.status||e.status>=500);
-addEventListener("online",()=>{if(!uid)sesion()});
-let sesBusy=false;
-async function sesion(){if(sesBusy)return;sesBusy=true;try{await sesion0()}finally{sesBusy=false}}
-async function sesion0(){track(false);hideSheet();
-let session=null,err=null;
-for(let i=0;i<3;i++){const r=await db.auth.getSession();session=r.data.session;err=r.error;if(session||!tr(err))break;await new Promise(x=>setTimeout(x,1500))}
-for(const k of["login","wait","admin","dapp","out","navcho"])$(k).hidden=true;me=null;uid=null;isAdm=false;
-if(!session&&tr(err)){$("e2").textContent="Reconectando tu sesión… ("+(err.message||"sin internet")+")";return void setTimeout(sesion,3000)}
-if(!session){$("login").hidden=false;$("e2").textContent=(err?"Sesión no válida: "+err.message+". ":"")+(store.get("ae")?"Último evento: "+store.get("ae"):"");return}
-uid=session.user.id;$("out").hidden=false;
-const adm=await db.rpc("is_admin");if(adm.error){$("e2").textContent="Sin conexión. Reintentando…";return void setTimeout(sesion,3000)}
-isAdm=!!adm.data;if(isAdm){$("admin").hidden=false;return loadAdm()}
-let {data,error}=await db.from("drivers").select().eq("user_id",uid).maybeSingle();
-if(error){$("e2").textContent="Sin conexión. Reintentando…";return void setTimeout(sesion,3000)}
-if(!data){const m=session.user.user_metadata||{},ins=await db.from("drivers").insert({user_id:uid,name:m.name||session.user.email,moto:m.moto||""}).select().single();
-if(ins.error&&ins.error.code==="23503"){await db.auth.signOut();uid=null;$("out").hidden=true;$("login").hidden=false;$("e2").textContent="Tu cuenta ya no está habilitada.";return}
-data=ins.data;if(!data){const a=await db.from("drivers").select().eq("user_id",uid).maybeSingle();data=a.data}
-if(!data){$("e2").textContent="No se pudo cargar tu cuenta. Reintentando…";return void setTimeout(sesion,3000)}}
-me=data;$("cn").value=me.name;if(me.moto)$("cm").value=me.moto;if(me.alias)$("al").value=me.alias;
-$("e2").textContent="";
-if(!me.active){$("wait").hidden=false;return}
-$("dapp").hidden=false;$("out").hidden=true;$("navcho").hidden=false;vcho("viajes");renderStatus();loadD();refreshPushUI();if(window.Notification&&Notification.permission==="granted")activarPush("chofer",1)}
-async function entrar(){$("e2").textContent="";const {error}=await db.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});
-if(error)return $("e2").textContent="No se pudo entrar: "+error.message;sesion()}
-async function registro(){$("e2").textContent="";
-if($("reg").hidden){$("reg").hidden=false;return $("e2").textContent="Completá tu nombre y modelo de moto y tocá de nuevo Crear cuenta."}
-const n=$("rn").value.trim();if(!n)return $("e2").textContent="Escribí tu nombre.";
-const {data,error}=await db.auth.signUp({email:$("em").value.trim(),password:$("pw").value,options:{data:{name:n,moto:$("rm").value.trim()}}});
-if(error)return $("e2").textContent=error.message;
-if(!data.session)return $("e2").textContent="Cuenta creada. Revisá tu correo para confirmarla y después entrá.";sesion()}
-async function salir(){if(uid&&!isAdm)await db.from("drivers").update({available:false}).eq("user_id",uid);await db.auth.signOut();sesion()}
-async function loadFact(){const p=$("rp").value,n=new Date(),f=p==="hoy"?new Date(n.getFullYear(),n.getMonth(),n.getDate()):p==="mes"?new Date(n.getFullYear(),n.getMonth(),1):null;
-let q=db.from("rides").select("driver_name,price,pay_method").eq("status","finalizado");if(f)q=q.gte("created_at",f.toISOString());
-const {data,error}=await q;if(error)return $("e2").textContent=error.message;
-const g={};data.forEach(r=>{const k=r.driver_name||"Sin chofer",x=g[k]||(g[k]={n:0,t:0,e:0,tr:0}),v=Number(r.price||0);x.n++;x.t+=v;if(r.pay_method==="efectivo")x.e+=v;else if(r.pay_method==="transferencia")x.tr+=v});
-const rows=Object.entries(g).sort((a,b)=>b[1].t-a[1].t),h=el("div","c");
-h.append(el("b","price",money(rows.reduce((a,[,x])=>a+x.t,0))),el("span",0,rows.reduce((a,[,x])=>a+x.n,0)+" viajes facturados"));
-$("fact").replaceChildren(h,...rows.map(([k,x])=>{const c=el("div","c");c.append(el("b",0,k),el("span",0,x.n+" viajes · "+money(x.t)+" · Efectivo "+money(x.e)+" · Transferencia "+money(x.tr)));return c}))}
-async function loadMsg(){const {data,error}=await db.from("messages").select().order("created_at",{ascending:false}).limit(30);if(error)return $("e2").textContent=error.message;
-$("msgs").replaceChildren(...(data.length?data.map(m=>{const c=el("div","c");c.append(el("span","st",(m.kind==="queja"?"Queja":"Mejora")+(m.leido?"":" · nuevo")),el("b",0,m.client_name||"Cliente sin nombre"),el("span",0,m.body));
-const a=el("button","o",m.leido?"Marcar como no leído":"Marcar como leído");a.onclick=async()=>{await db.from("messages").update({leido:!m.leido}).eq("id",m.id);loadMsg()};
-const x=el("button","o","Borrar mensaje");x.onclick=async()=>{await db.from("messages").delete().eq("id",m.id);loadMsg()};c.append(a,x);return c}):[empty("No hay mensajes.")]))}
-$("rp").onchange=loadFact;
-async function loadAdm(){loadFact();loadMsg();const {data,error}=await db.from("drivers").select().order("name");if(error)return $("e2").textContent=error.message;
-$("dl").replaceChildren(...(data.length?data.map(d=>{const c=el("div","c");c.append(el("span","st",d.active?"Membresía activa":"Sin membresía"),el("b",0,d.name),el("span",0,d.moto||"Sin modelo"));
-const a=el("button",d.active?"o":0,d.active?"Suspender membresía":"Activar membresía");a.onclick=async()=>{await db.rpc("admin_set_active",{uid:d.user_id,flag:!d.active});loadAdm()};
-const x=el("button","o","Eliminar chofer de la app");x.onclick=async()=>{if(confirm("¿Eliminar a "+d.name+"? Se borra su cuenta y no podrá volver a entrar."))await db.rpc("admin_delete_driver",{uid:d.user_id});loadAdm()};
-c.append(a,x);return c}):[empty("Todavía no hay choferes registrados.")]))}
-
 async function enviarMsg(){const b=$("mb").value.trim(),m=$("mm");m.style.color="";m.textContent="";if(!b)return m.textContent="Escribí tu mensaje.";
 const {error}=await db.from("messages").insert({client_name:$("n").value.trim(),kind:$("mk").value,body:b});
 if(error)return m.textContent="No se pudo enviar: "+error.message;$("mb").value="";m.style.color="inherit";m.textContent="✅ Mensaje enviado. ¡Gracias!"}
@@ -406,7 +195,7 @@ if(f.pick){setPickup(f.pick);map.setView(f.pick,15);gps=!!f.gps;acc=f.acc||null}
 const VAPID="BGsIfi8ZkrDD8mglmkExXZk-_JIl4s6uBIaKLTzEFmfkflN2iFPLWY2BXNBI9VWi2L4EInr68IMoPj2dJa_pTJM";
 const cid=store.get("cid")||(()=>{const v=crypto.randomUUID();store.set("cid",v);return v})();
 const b64=u=>{const a=atob((u+"=".repeat((4-u.length%4)%4)).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from([...a].map(c=>c.charCodeAt(0)))};
-function refreshPushUI(){const ok=!("Notification" in window)||Notification.permission==="granted";$("pushc").hidden=ok;$("pushd").hidden=ok}
+function refreshPushUI(){const ok=!("Notification" in window)||Notification.permission==="granted";$("pushc").hidden=ok}
 async function activarPush(rol,silent){const al=m=>{if(!silent)alert(m)};
 if(!("serviceWorker" in navigator)||!("PushManager" in window))return al("Este navegador no permite notificaciones. Abrí la app desde Chrome.");
 const p=await Notification.requestPermission();refreshPushUI();
@@ -418,8 +207,8 @@ if(error)return al("No se pudo activar: "+error.message);al("✅ Notificaciones 
 async function probarNotif(rol){if(!("Notification" in window)||Notification.permission!=="granted")return alert("Primero activá las notificaciones.");
 const t=rol==="cliente"?["🏍️ ¡Tu mototaxi va en camino!","Juan sale a buscarte a Plaza central.\n(Notificación de prueba)"]:["🏍️ ¡NUEVO VIAJE!","📍 Recogida: Plaza central\n🏁 Destino: Hospital\n📏 3.2 km · Cliente de prueba"];
 const reg=await navigator.serviceWorker.ready;reg.showNotification(t[0],{body:t[1],icon:"icon-192.png",badge:"badge-96.png",tag:"prueba",renotify:true,requireInteraction:true,lang:"es",vibrate:[600,200,600,200,600,200,900]})}
-if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.type==="push"){loadD();refreshC()}});
-document.addEventListener("visibilitychange",()=>{if(!document.hidden){loadD();refreshC();loadA()}});
+if("serviceWorker" in navigator)navigator.serviceWorker.addEventListener("message",e=>{if(e.data&&e.data.type==="push"){refreshC()}});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden){refreshC();loadA()}});
 refreshPushUI();
 
 /* ---------- INSTALAR COMO APP ---------- */
@@ -429,31 +218,10 @@ $("inst").onclick=async()=>{if(!ip)return;ip.prompt();await ip.userChoice;ip=nul
 addEventListener("appinstalled",()=>{$("inst").hidden=true});
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
-/* ---------- NAVEGACIÓN, ESTADO Y AVISO DE VIAJE NUEVO ---------- */
-const NAV={cli:["pedir","motos","msg"],cho:["viajes","act","bil","perfil"]};
+/* ---------- NAVEGACIÓN ---------- */
+const NAV={cli:["pedir","motos","msg"]};
 function vcli(v){for(const k of NAV.cli){$("cv-"+k).hidden=k!==v;$("nc-"+k).classList.toggle("on",k===v)}if(v==="pedir")setTimeout(()=>map.invalidateSize(),50);if(v==="motos")loadA()}
-function vcho(v){for(const k of NAV.cho){$("dv-"+k).hidden=k!==v;$("nh-"+k).classList.toggle("on",k===v)}if(v==="perfil")estadoPush()}
-function renderStatus(){const on=$("av").checked;$("slab").textContent=on?"EN LÍNEA":"DESCONECTADO";$("slab").style.color=on?"var(--g)":"var(--mut)";
-$("ssub").textContent=on?"Recibís viajes nuevos":"Tocá para volver al servicio";$("sdot").className="dot"+(on?" on":"");$("sbtn").firstElementChild.textContent=on?"Desconectar":"Conectar"}
-function toggleOnline(){$("av").checked=!$("av").checked;renderStatus();$("av").onchange()}
-$("mt").value=store.get("meta")||50000;$("mt").onchange=()=>{store.set("meta",$("mt").value);loadD()};
-let sheetId=null,tleft=0,tmr=null;const dism=new Set();
-function hideSheet(){$("sheet").hidden=true;sheetId=null;clearInterval(tmr)}
-async function rechazarSheet(){const id=sheetId;if(id){dism.add(id);await db.rpc("driver_reject",{p_ride:id})}hideSheet();loadD()}
-function renderSheet(nw){const ok=document.body.dataset.r==="cho"&&!$("dapp").hidden&&$("av").checked,r=ok?nw.find(x=>!dism.has(x.id)):null;
-if(!r){hideSheet();return}
-$("sheet").hidden=false;
-if(sheetId!==r.id){sheetId=r.id;$("shtitle").textContent=r.pickup_loc?"¡Nueva solicitud en "+r.pickup_loc+"!":"¡Nueva solicitud cercana!";tleft=15;clearInterval(tmr);$("cd").textContent="15s";$("cbar").style.width="100%";
-tmr=setInterval(()=>{tleft--;$("cd").textContent=Math.max(tleft,0)+"s";$("cbar").style.width=Math.max(tleft,0)/15*100+"%";if(tleft<0){dism.add(sheetId);hideSheet();loadD()}},1000);
-$("sheetBody").replaceChildren(quote(r,true))}}
-
-async function estadoPush(){const e=$("pstat");
-if(!("Notification" in window)||!("serviceWorker" in navigator)||!("PushManager" in window)){e.textContent="Este navegador no soporta notificaciones push.";return}
-let sub=null;try{const reg=await navigator.serviceWorker.ready;sub=await reg.pushManager.getSubscription()}catch(x){}
-const per={granted:"✅ concedido",denied:"❌ bloqueado",default:"⚠️ sin responder"}[Notification.permission];
-e.textContent="Permiso: "+per+" · Suscripción en este celular: "+(sub?"✅ sí":"❌ no (tocá Activar)")+" · App: "+(matchMedia("(display-mode: standalone)").matches?"✅ instalada":"⚠️ abierta desde el navegador")}
-
 /* ---------- TIEMPO REAL ---------- */
-db.channel("rides-all").on("postgres_changes",{event:"*",schema:"public",table:"rides"},()=>{refreshC();loadD();loadA()}).subscribe();
-setInterval(()=>{refreshC();loadD();loadA()},4000);renderC();refreshC();loadA();sesion();
+db.channel("rides-cli").on("postgres_changes",{event:"*",schema:"public",table:"rides"},()=>{refreshC();loadA()}).subscribe();
+setInterval(()=>{refreshC();loadA()},4000);renderC();refreshC();loadA();
 </script></body></html>
