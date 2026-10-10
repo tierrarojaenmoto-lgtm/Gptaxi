@@ -215,7 +215,7 @@ else if(moto){moto.remove();moto=null}}
 
 let rat={};const motoOf={};let availNames=[];
 const stars=n=>rat[n]?"⭐ "+(rat[n].s/rat[n].n).toFixed(1)+" ("+rat[n].n+")":"sin puntos aún";
-async function loadA(){const [a,b]=await Promise.all([db.from("drivers").select().eq("available",true).eq("active",true).gt("last_seen",new Date(Date.now()-60000).toISOString()),db.from("rides").select("driver_name,rating").not("rating","is",null)]);
+async function loadA(){const [a,b]=await Promise.all([db.from("drivers").select().eq("available",true).eq("active",true),db.from("rides").select("driver_name,rating").not("rating","is",null)]);
 rat={};(b.data||[]).forEach(r=>{const x=rat[r.driver_name]||(rat[r.driver_name]={s:0,n:0});x.s+=r.rating;x.n++});
 const d=a.data||[];availNames=d.map(x=>x.name);$("avail").replaceChildren(...(d.length?d.map(x=>{const c=el("div","c");c.append(el("b",0,x.name),el("span",0,(x.moto||"Moto sin modelo")+" · "+stars(x.name)));return c}):[el("p","s","No hay motos disponibles ahora.")]))}
 
