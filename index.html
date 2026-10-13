@@ -26,6 +26,14 @@ main{max-width:560px;margin:0 auto;padding:calc(80px + env(safe-area-inset-top,0
 .driver-promo .promo-points span{font-size:12px;font-weight:700;color:#e5edff;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.08);border-radius:99px;padding:6px 9px}
 .driver-promo a{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:15px;min-height:50px;padding:12px 15px;border-radius:999px;background:#fbbf24;color:#392800;text-decoration:none;font-weight:700;font-size:15px;box-shadow:0 4px 0 #b77d0b}
 .driver-promo a{transition:transform .16s,filter .16s,box-shadow .16s}.driver-promo a:hover{filter:brightness(1.07);box-shadow:0 6px 0 #b77d0b,0 8px 20px rgba(251,191,36,.16)}.driver-promo a:active{transform:scale(.98)}.driver-promo .promo-note{display:block;margin-top:10px;font-size:11px;color:#b8c4dc;text-align:center}
+/* Promos compactas: no interrumpen el pedido principal */
+.driver-promo-compact{display:flex;align-items:center;gap:10px;margin:0 0 9px;padding:10px 11px;border-radius:15px;min-height:62px;animation:none;box-shadow:none;background:linear-gradient(120deg,#263653,#111a2d);border:1px solid rgba(251,191,36,.32)}
+.driver-promo-compact:after{display:none}.driver-promo-icon,.company-promo-icon{width:36px;height:36px;flex:none;border-radius:11px;display:grid;place-items:center;font-size:20px;background:rgba(251,191,36,.13)}
+.driver-promo-copy,.company-promo-copy{min-width:0;flex:1}.driver-promo-copy b,.company-promo-copy b{display:block;color:#fff0c8;font-size:13px;line-height:1.25}.driver-promo-copy small,.company-promo-copy small{display:block;color:#c4d0e4;font-size:11px;line-height:1.3;margin-top:3px}
+.driver-promo-compact a{flex:none;width:auto;min-height:36px;margin:0;padding:8px 10px;border-radius:10px;box-shadow:none;font-size:11px;white-space:nowrap}
+.company-promo{display:flex;align-items:center;gap:10px;margin:0 0 13px;padding:10px 11px;border-radius:15px;border:1px solid rgba(130,210,255,.42);background:linear-gradient(115deg,rgba(24,78,105,.52),rgba(19,27,46,.98));box-shadow:0 4px 12px rgba(0,0,0,.16)}
+.company-promo-icon{background:rgba(130,210,255,.15)}.company-promo-copy b{color:#d8f1ff}.company-promo-copy small{color:#c0d4e6}.company-promo a{flex:none;display:inline-flex;align-items:center;justify-content:center;min-height:36px;padding:8px 10px;border-radius:10px;background:#82d2ff;color:#08243a;text-decoration:none;font-weight:700;font-size:11px;white-space:nowrap}
+@media(max-width:370px){.driver-promo-compact,.company-promo{gap:7px;padding:9px}.driver-promo-icon,.company-promo-icon{width:31px;height:31px;font-size:17px}.driver-promo-copy b,.company-promo-copy b{font-size:12px}.driver-promo-copy small,.company-promo-copy small{font-size:10px}.driver-promo-compact a,.company-promo a{padding:7px;font-size:10px}}
 .notify-card{display:flex;align-items:center;gap:12px;margin:0 0 16px;padding:13px 14px;border:1px solid rgba(130,210,255,.28);border-radius:18px;background:linear-gradient(120deg,rgba(130,210,255,.1),rgba(23,31,51,.98));box-shadow:0 6px 18px rgba(0,0,0,.16)}.notify-icon{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:14px;background:rgba(130,210,255,.13);color:var(--b);font-size:22px}.notify-copy{min-width:0;flex:1}.notify-copy b{display:block;font-size:14px}.notify-copy small{display:block;margin-top:2px;color:#b9c8e4;font-size:12px;line-height:1.35}.notify-card button{width:auto;flex:none;height:auto;min-height:40px;margin:0;padding:9px 12px;font-size:12px;background:var(--y);color:#402d00;white-space:nowrap}.notify-card.ready{border-color:rgba(69,223,164,.35)}.notify-card.ready .notify-icon{background:rgba(69,223,164,.14);color:var(--g)}@keyframes promoIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes promoShine{0%,65%{left:-70%}100%{left:140%}}@media(prefers-reduced-motion:reduce){.driver-promo,.driver-promo:after{animation:none}}@media(max-width:390px){.driver-promo{padding:16px}.driver-promo h2{font-size:21px}.notify-card{gap:8px;padding:11px}.notify-card button{padding:9px;font-size:11px}}
 
 .quick-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:12px 0}.quick-actions button{margin:0;min-height:48px;height:auto;padding:11px 10px;background:linear-gradient(135deg,#273653,#1a263e);color:var(--ink);border:1px solid #394863;font-size:13px}.quick-actions button span{display:block;font-size:19px;margin-bottom:3px}.favorites{margin:12px 0;padding:13px;border-radius:18px;background:var(--c2);border:1px solid var(--c4)}.favorites h3{margin:0 0 8px;font-size:14px}.favorite-list{display:flex;flex-wrap:wrap;gap:7px}.favorite-list button{width:auto;height:auto;min-height:38px;margin:0;padding:8px 11px;background:var(--c3);color:var(--ink);font-size:12px}.favorite-list button.remove{color:var(--err);background:transparent;border:1px solid var(--c4)}.connection-pill{display:flex;align-items:center;gap:8px;margin:8px 0 12px;color:#b9c8e4;font-size:12px}.connection-pill i{width:8px;height:8px;border-radius:50%;background:var(--g);display:inline-block}.connection-pill.offline i{background:var(--err)}.trip-steps{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:13px 0 8px}.trip-step{font-size:10px;text-align:center;color:#9caac5;line-height:1.25}.trip-step .bubble{width:25px;height:25px;margin:0 auto 5px;border-radius:50%;display:grid;place-items:center;background:var(--c4);font-weight:700}.trip-step.active{color:var(--y);font-weight:700}.trip-step.active .bubble,.trip-step.done .bubble{background:var(--y);color:#402d00}.trip-step.done{color:var(--g)}.trip-share{margin-top:10px!important;background:var(--c3)!important;color:var(--ink)!important}.safety-note{font-size:12px;color:#b9c8e4;background:rgba(130,210,255,.07);border-radius:14px;padding:11px;margin-top:10px}
@@ -64,7 +72,7 @@ summary{cursor:pointer;font-weight:700}
 .bar{height:12px;background:var(--c4);border-radius:99px;overflow:hidden;margin-top:8px;padding:2px}.bar i{display:block;height:100%;border-radius:99px;background:var(--y);width:0;transition:width 1s}
 .lbl{font:700 11px "Space Grotesk",sans-serif;letter-spacing:.06em;text-transform:uppercase;opacity:.75}
 .bn{position:fixed;left:0;right:0;bottom:0;z-index:50;height:calc(80px + env(safe-area-inset-bottom,0px));padding-bottom:env(safe-area-inset-bottom,0px);background:rgba(6,14,32,.92);backdrop-filter:blur(14px);display:flex;justify-content:space-around;align-items:center;box-shadow:0 -2px 12px rgba(0,0,0,.35)}
-.bn button{width:76px;height:58px;margin:0;padding:0;background:none;color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:20px}
+.bn button{width:68px;height:58px;margin:0;padding:0;background:none;color:var(--mut);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:700;letter-spacing:.03em;border-radius:20px}
 .bn button.on{color:var(--y);background:rgba(251,191,36,.1)}
 body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 .sheet{position:fixed;left:0;right:0;bottom:calc(88px + env(safe-area-inset-bottom,0px));z-index:40;padding:0 16px}
@@ -73,9 +81,45 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 .sh{display:flex;justify-content:space-between;align-items:center}.sh b{font-size:18px;color:#ffe1a7}
 .tbar{height:6px;background:var(--c2);border-radius:99px;overflow:hidden;margin-top:12px}.tbar i{display:block;height:100%;background:var(--y);width:100%;transition:width 1s linear}
 .c.bad{background:rgba(255,180,171,.1);box-shadow:0 0 0 2px var(--err)}
+
+/* EMPRESAS · envíos y mensajería */
+.company-map{height:220px;border-radius:16px;background:var(--lo);border:1px solid var(--c4);margin-top:8px;overflow:hidden}
+.parcel-options{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+.parcel-option{height:auto;min-height:112px;margin:0;padding:12px 8px;border:2px solid var(--c4);border-radius:16px;background:var(--c3);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;font-size:25px}
+.parcel-option b{font-size:14px;text-align:center}
+.parcel-option small{font:400 11px/1.35 "Hanken Grotesk",sans-serif;color:#b9c8e4;text-align:center}
+.parcel-option.selected{border-color:var(--y);background:rgba(251,191,36,.14);color:#ffe1a7;box-shadow:0 0 0 1px var(--y)}
+
+#cv-empresas{padding-bottom:18px}
+.company-live{margin-top:16px;padding:18px;border:2px solid #8da4c2;border-left:7px solid #164a7b;border-radius:16px;background:#f4f7fc;color:#13253d;box-shadow:0 8px 24px rgba(0,0,0,.24)}
+.company-live h3{margin:4px 0 12px;font-size:22px;line-height:1.2;color:#102b4b}.company-live .quote-price{font-size:32px;font-weight:900;display:block;margin:10px 0;color:#075d43}
+.company-live>p:not(.hint){font-size:16px;font-weight:700;line-height:1.45;color:#1b2f49}.company-live .hint{font-size:14px;line-height:1.5;color:#40516a}.company-live .quote-actions button{min-height:52px;font-size:15px}.company-live .quote-actions button.o{background:#e2e9f2!important;color:#1b2e47!important;border:1px solid #9eafc4}
+.company-live .company-status-banner{padding:14px 13px;margin:10px 0 14px;border-radius:12px;background:#e3edf8;border:1px solid #9cb4d0;border-left:6px solid #245b8f;color:#142b46}.company-live .company-status-banner b{display:block;font-size:18px;line-height:1.3;margin-bottom:5px}.company-live .company-status-banner span{display:block;font-size:14px;line-height:1.45}.company-live .company-status-banner.status-ok{background:#e2f5ec;border-color:#8cc7ac;border-left-color:#13754a;color:#124b35}.company-live .company-status-banner.status-warn{background:#fff2d3;border-color:#e4bf61;border-left-color:#a56b00;color:#624000}.company-live .company-status-banner.status-stop{background:#fde9e7;border-color:#e1a5a0;border-left-color:#a52d26;color:#76201b}.company-live .quote-actions{display:flex;gap:10px;flex-wrap:wrap}.company-live .quote-actions button{flex:1;min-width:130px}
+.company-hero{padding:18px;border:1px solid rgba(130,210,255,.3);border-radius:22px;background:linear-gradient(135deg,#20334b,#131b2e 75%);margin:8px 0 14px}
+.company-hero .eyebrow{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--b);font-weight:700}
+.company-hero h2{margin:7px 0;color:#fff0c8;font-size:23px}
+.company-hero p{margin:0;color:#c9d7ee}
+.company-progress{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}
+.company-progress button{min-width:0;height:auto;min-height:68px;margin:0;padding:9px 5px;text-align:center;border-radius:13px;background:#202b40;color:#d7e2f7;border:1px solid #52617b;font-size:12px;line-height:1.25;box-shadow:none}
+.company-progress button.active{background:#fff0c2;color:#352400;border:2px solid #fbbf24;box-shadow:0 0 0 2px rgba(251,191,36,.18)}
+.company-progress button:active{transform:scale(.98)}
+.company-progress b{display:grid;place-items:center;margin:0 auto 5px;width:28px;height:28px;border-radius:50%;background:#3a4962;color:#fff;font-size:15px;line-height:1}
+.company-progress button.active b{background:#fbbf24;color:#352400}
+.company-panel{padding:16px;background:var(--c2);border:1px solid var(--c4);border-radius:20px;margin-top:10px}
+.company-panel h3{margin:0 0 5px;font-size:18px}
+.company-panel .hint{font-size:13px;color:#b9c8e4;margin:0 0 8px}
+.company-actions{display:flex;gap:8px}
+.company-actions button{flex:1}
+.company-summary{background:var(--c3);border-radius:14px;padding:12px;margin-top:12px}
+.company-summary p{margin:5px 0;overflow-wrap:anywhere}
+.company-rate{border:1px solid rgba(251,191,36,.4);border-radius:14px;padding:12px;margin-top:12px;color:#ffe1a7;font-size:13px}
+.company-favs{margin:12px 0;padding:13px;border-radius:15px;background:#18243a;border:1px solid #4a5b78}.company-favs h4{margin:0 0 7px;font-size:15px}.company-favs .hint{margin:0 0 8px}.company-favs button{font-size:14px}.company-fav-list{display:grid;gap:9px;margin:12px 0}.company-fav-list .fav-item{display:flex;align-items:stretch;gap:8px}.company-fav-list .fav-pick{flex:1;text-align:left;white-space:normal;height:auto;min-height:52px;margin:0;padding:11px;border-radius:12px;background:#edf5ff;color:#14243b;font-size:14px;line-height:1.3}.company-fav-list .remove-fav{width:48px;flex:none;height:auto;min-height:48px;margin:0;padding:8px;background:#fff0ee;color:#8b1e16;border:1px solid #e7a49e;font-size:18px}
+.fav-modal{position:fixed;inset:0;z-index:200;background:rgba(3,8,20,.82);display:flex;align-items:center;justify-content:center;padding:18px;padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}.fav-modal-card{width:min(100%,480px);max-height:82vh;overflow:auto;background:#f4f7fc;color:#14243b;border-radius:20px;padding:18px;box-shadow:0 22px 70px rgba(0,0,0,.55);border:2px solid #c4d0e2}.fav-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.fav-modal-head h3{margin:0;font-size:21px;color:#10213b}.fav-modal-head p{margin:5px 0 0;color:#45566e;font-size:13px}.fav-modal .fav-close{width:42px;min-width:42px;height:42px;margin:0;padding:0;background:#dfe7f2;color:#14243b;font-size:18px}.fav-modal .company-fav-list:empty:after{content:"Todavía no guardaste destinos. Marcá un destino en el mapa y tocá Guardar el destino marcado.";display:block;padding:13px;border-radius:12px;background:#e4ebf5;color:#40516a;font-size:14px;line-height:1.4}.company-alias-pay{margin-top:12px;padding:12px;border-radius:13px;background:#eaf4ff;color:#132943;border:1px solid #b6cce4}.company-alias-pay>b{display:block;font-size:14px;margin-bottom:8px}.company-alias-row{display:flex;gap:7px;align-items:stretch}.company-alias-input{flex:1;min-width:0;padding:10px;border:1px solid #a6bad2;border-radius:10px;background:white;color:#10213b;font-weight:700;font-size:15px}.company-alias-copy{width:auto;flex:none;min-height:42px;height:auto;margin:0;padding:9px 12px;border-radius:10px;background:#0b7551;color:white;font-size:12px;white-space:nowrap}.company-alias-pay small{display:block;margin-top:7px;color:#40516a;font-size:12px;line-height:1.35}@media(max-width:370px){.company-alias-row{flex-direction:column}.company-alias-copy{width:100%}}
+.company-track-panel{margin-top:12px;padding:12px;border-radius:14px;background:#eaf4ff;color:#17263c}.company-track-panel h4{margin:0 0 7px}.company-track-map{height:230px;border-radius:12px;overflow:hidden;margin-top:10px;border:1px solid #b9c8e4}.company-driver{padding:10px;border-radius:12px;background:rgba(19,27,46,.08);margin-top:10px}.company-driver p{margin:4px 0;overflow-wrap:anywhere}.company-live .new-company-request{background:#0b7551;color:white}
+@media(max-width:390px){.bn button{width:24vw;font-size:9px}}
 </style></head>
 <body data-r="cli">
-<header><div class="hb"><div class="brand"><img src="icon-192.png" alt="GPTAXI"><div><b>GPTAXI</b><small>Mototaxi</small></div></div>
+<header><div class="hb"><div class="brand"><img src="icon-192.png" alt="GPTAXI"><div><b>GPTAXI</b><small>Mototaxi · Mensajería</small></div></div>
 </div></header>
 <main>
 <button id="inst" hidden style="margin:0 0 4px">📲 Instalar la app en tu celular</button>
@@ -83,14 +127,11 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 
 <section id="cli">
 <div id="cv-pedir">
-<div class="driver-promo" aria-label="Publicidad para trabajar como chofer de GPTAXI">
-  <div class="promo-top">🏍️ Oportunidad para vos · GPTAXI</div>
-  <h2>¿Tenés moto? ¡Sumate como chofer!</h2>
-  <p>Generá ingresos extra llevando pasajeros de tu ciudad. Consultanos por WhatsApp y te contamos cómo recibir la app y registrarte para empezar.</p>
-  <div class="promo-points"><span>✓ Con tu propia moto</span><span>✓ Organizá tus horarios</span><span>✓ Sumate a la comunidad</span></div>
-  <a href="https://wa.me/5493757527231?text=Hola%2C%20quiero%20trabajar%20como%20chofer%20de%20GPTAXI.%20Me%20interesa%20registrarme%20y%20recibir%20la%20aplicaci%C3%B3n%20para%20comenzar." target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp para ser chofer de GPTAXI">💬 QUIERO SER CHOFER</a>
-  <small class="promo-note">Tocá el botón y escribinos directamente por WhatsApp.</small>
+<div class="driver-promo driver-promo-compact" aria-label="Información para trabajar como chofer de GPTAXI">
+  <span class="driver-promo-icon">🏍️</span><div class="driver-promo-copy"><b>¿Tenés moto? Sumate como chofer</b><small>Consultá por WhatsApp.</small></div>
+  <a href="https://wa.me/5493757527231?text=Hola%2C%20quiero%20trabajar%20como%20chofer%20de%20GPTAXI.%20Me%20interesa%20registrarme%20y%20recibir%20la%20aplicaci%C3%B3n%20para%20comenzar." target="_blank" rel="noopener noreferrer" aria-label="Consultar por WhatsApp para ser chofer de GPTAXI">Consultar ↗</a>
 </div>
+<div class="company-promo" aria-label="Promoción de envíos por mensajería GPTAXI"><span class="company-promo-icon">📦</span><div class="company-promo-copy"><b>¿Necesitás enviar un paquete?</b><small>Pedí mensajería de forma fácil y seguí tu envío.</small></div><a href="#cv-empresas" onclick="event.preventDefault();vcli('empresas')" aria-label="Abrir GPTAXI Empresas">Enviar paquete ↗</a></div>
 <div id="notifyCard" class="notify-card"><div class="notify-icon" id="notifyIcon">🔔</div><div class="notify-copy"><b id="notifyTitle">Activá los avisos de GPTAXI</b><small id="notifyText">Recibí novedades de tu viaje. Permití las notificaciones y revisá que estén habilitadas en tu celular.</small></div><button id="pushc" onclick="activarPush('cliente')">Activar avisos</button></div>
 <div class="quick-actions">
 <button type="button" onclick="compartirGPTAXI()"><span>📲</span>Compartir GPTAXI</button>
@@ -117,12 +158,78 @@ body[data-r=cli] #navcho,body[data-r=cho] #navcli{display:none}
 <label for="mb">Tu mensaje</label><textarea id="mb" rows="4" maxlength="1000"></textarea>
 <button onclick="enviarMsg()">Enviar mensaje</button><div class="err" id="mm"></div>
 <button class="o" onclick="probarNotif('cliente')">Probar notificación en este celular</button></div>
+
+<div id="cv-empresas" hidden>
+  <div class="company-hero"><div class="eyebrow">📦 GPTAXI · Empresas</div>
+    <h2>Envíos y mensajería</h2>
+    <p>Mandá paquetes con la misma tarifa y el mismo sistema de cotización de los mototaxis.</p>
+  </div>
+  <div class="company-progress" aria-label="Pasos para solicitar un envío">
+    <button type="button" id="ep-1" class="active" onclick="empresaNext(1)" aria-label="Ir al paso 1: Remitente"><b>1</b>Remitente</button>
+    <button type="button" id="ep-2" onclick="empresaNext(2)" aria-label="Ir al paso 2: Datos del envío"><b>2</b>Envío</button>
+    <button type="button" id="ep-3" onclick="empresaNext(3)" aria-label="Ir al paso 3: Confirmar"><b>3</b>Confirmar</button>
+  </div>
+  <div class="company-panel" id="empresa-step1">
+    <h3>1. ¿Desde dónde sale el paquete?</h3>
+    <p class="hint">Ingresá el negocio o remitente y marcá el punto exacto de retiro.</p>
+    <label for="empSender">Nombre del negocio o cliente</label>
+    <input id="empSender" autocomplete="organization" maxlength="100" placeholder="Ej.: Despensa La Esquina">
+    <label for="empPhone">Teléfono del remitente (opcional)</label>
+    <input id="empPhone" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="Teléfono de contacto">
+    <button type="button" id="empGps" onclick="empresaGPS()">📍 Usar mi ubicación exacta para el retiro</button>
+    <p class="hint" id="empGpsStatus">Permití el GPS del celular para ubicar el retiro automáticamente.</p>
+    <label for="empPickup">Dirección o referencia del retiro</label>
+    <input id="empPickup" maxlength="180" placeholder="Se completa con el GPS o podés escribir una referencia">
+    <div id="empPickupMap" class="company-map"></div>
+    <button type="button" class="o" onclick="empresaUseMap('pickup')">📍 Marcar retiro tocando el mapa</button>
+    <button type="button" onclick="empresaNext(2)">Continuar al destinatario</button>
+  </div>
+  <div class="company-panel" id="empresa-step2" hidden>
+    <h3>2. ¿A dónde enviamos el paquete?</h3>
+    <p class="hint">Marcá el destino en el mapa y completá los datos de quien recibe.</p>
+    <label for="empRecipient">Nombre del destinatario</label>
+    <input id="empRecipient" maxlength="100" placeholder="Nombre y apellido">
+    <label for="empRecipientPhone">Teléfono del destinatario</label>
+    <input id="empRecipientPhone" inputmode="tel" autocomplete="tel" maxlength="30" placeholder="Teléfono de contacto">
+    <label for="empDropoff">Dirección o referencia de entrega</label>
+    <input id="empDropoff" maxlength="180" placeholder="Se completa al marcar el destino">
+    <div id="empDropoffMap" class="company-map"></div>
+    <button type="button" class="o" onclick="empresaUseMap('dropoff')">🏁 Marcar destino tocando el mapa</button>
+    <div class="company-favs"><h4>⭐ Destinos guardados</h4><p class="hint">Elegí un destino guardado para completar el envío sin volver a buscarlo en el mapa.</p><button type="button" onclick="empresaOpenFavorites()">📂 Abrir mis destinos favoritos</button><button type="button" class="o" onclick="empresaSaveFavorite()">＋ Guardar el destino marcado</button></div>
+    <h3 style="margin-top:18px">¿Qué tamaño tiene el paquete?</h3>
+    <p class="hint">Elegí una opción.</p>
+    <div class="parcel-options" role="radiogroup" aria-label="Tamaño del paquete">
+      <button type="button" class="parcel-option" data-size="Sobre o documento" onclick="empresaSelectParcel(this)">✉️<b>Sobre / documento</b><small>Documentos o papeles</small></button>
+      <button type="button" class="parcel-option" data-size="Pequeño" onclick="empresaSelectParcel(this)">📦<b>Pequeño</b><small>Paquete chico y liviano</small></button>
+      <button type="button" class="parcel-option" data-size="Mediano" onclick="empresaSelectParcel(this)">🗃️<b>Mediano</b><small>Paquete de tamaño intermedio</small></button>
+      <button type="button" class="parcel-option" data-size="Grande" onclick="empresaSelectParcel(this)">🗳️<b>Grande</b><small>Paquete voluminoso</small></button>
+    </div>
+    <div class="company-actions"><button type="button" class="o" onclick="empresaNext(1)">Atrás</button><button type="button" onclick="empresaNext(3)">Continuar</button></div>
+  </div>
+  <div class="company-panel" id="empresa-step3" hidden>
+    <h3>3. Confirmá el envío</h3>
+    <p class="hint">Revisá los datos. Al confirmar, los choferes recibirán la solicitud y podrán enviarte su tarifa.</p>
+    <div class="company-summary" id="empresaSummary"></div>
+    <div class="company-rate">💰 <b>Tarifa igual a mototaxi:</b> el chofer te enviará su cotización para que puedas aceptarla o rechazarla.</div>
+    <div class="company-actions"><button type="button" class="o" onclick="empresaNext(2)">Atrás</button><button type="button" id="empresaSend" onclick="solicitarEnvio()">📦 Pedir mensajería</button></div>
+    <div class="err" id="empresaError" role="status"></div>
+    <div id="empresaLive" class="company-live" aria-live="polite" hidden></div>
+    <div id="empresaTrackingPanel" class="company-track-panel" hidden><h4>📍 Seguimiento del paquete</h4><div id="empresaTrackingText">Esperando ubicación del chofer…</div><div id="empresaTrackingMap" class="company-track-map"></div></div>
+  </div>
+  <div id="empresaResult"></div>
+  <div id="empresaFavoritesModal" class="fav-modal" hidden role="dialog" aria-modal="true" aria-labelledby="empresaFavTitle" onclick="if(event.target===this)empresaCloseFavorites()">
+    <div class="fav-modal-card"><div class="fav-modal-head"><div><h3 id="empresaFavTitle">⭐ Mis destinos favoritos</h3><p>Seleccioná un destino para usarlo en este envío.</p></div><button type="button" class="fav-close" aria-label="Cerrar favoritos" onclick="empresaCloseFavorites()">✕</button></div>
+    <div id="empresaFavoriteList" class="company-fav-list"></div>
+    <button type="button" class="o" onclick="empresaCloseFavorites()">Cerrar ventana</button></div>
+  </div>
+</div>
 </section>
 </main>
 <nav class="bn" id="navcli">
 <button id="nc-pedir" class="on" onclick="vcli('pedir')"><span class="material-symbols-outlined">pin_drop</span>Pedir</button>
 <button id="nc-motos" onclick="vcli('motos')"><span class="material-symbols-outlined">two_wheeler</span>Motos</button>
 <button id="nc-msg" onclick="vcli('msg')"><span class="material-symbols-outlined">chat</span>Mensajes</button>
+ <button id="nc-empresas" onclick="vcli('empresas')"><span class="material-symbols-outlined">inventory_2</span>Empresas</button>
 </nav>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
@@ -184,7 +291,7 @@ async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.i
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
 const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(ride.tariff_rejected_by||[]),ride.driver_name],event_at:new Date().toISOString()},"cotizado");
 const cancelar=()=>{if(["aceptado","en_camino"].includes(ride.status)&&!confirm("¿Cancelar el viaje? Se le avisa al chofer."))return;return upd({status:"cancelado",event_at:new Date().toISOString()})};
-async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if((data.rejected_by||[]).length>(ride.rejected_by||[]).length)notif("🚫 Un chofer no pudo tomar tu viaje","Seguimos buscando otro chofer.","rej-"+data.id+"-"+(data.rejected_by||[]).length);if(data.status!==ride.status){if(data.status==="cotizado")notif("💰 Tarifa: "+money(data.price||0),(data.driver_name||"El chofer")+" te envió su tarifa. Abrí la app para aceptar.","cli-"+data.id+"-cotizado");if(data.status==="en_camino")notif("🏍️ ¡Tu mototaxi va en camino!",(data.driver_name||"El chofer")+" sale a buscarte.","cli-"+data.id+"-en_camino")}ride=data;renderC();const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
+async function refreshC(){if(!ride)return;const {data}=await db.from("rides").select().eq("id",ride.id).single();if(data){if((data.rejected_by||[]).length>(ride.rejected_by||[]).length)notif("🚫 Un chofer no pudo tomar tu viaje","Seguimos buscando otro chofer.","rej-"+data.id+"-"+(data.rejected_by||[]).length);if(data.status!==ride.status){if(data.status==="cotizado")notif("💰 Tarifa: "+money(data.price||0),(data.driver_name||"El chofer")+" te envió su tarifa. Abrí la app para aceptar.","cli-"+data.id+"-cotizado");if(data.status==="en_camino")notif("🏍️ ¡Tu mototaxi va en camino!",(data.driver_name||"El chofer")+" sale a buscarte.","cli-"+data.id+"-en_camino")}ride=data;renderC();renderEmpresaStatus(data);const dn=data.driver_name;if(dn&&!(dn in motoOf)){motoOf[dn]="";db.from("drivers").select("moto").eq("name",dn).maybeSingle().then(x=>{motoOf[dn]=(x.data&&x.data.moto)||"";renderC()})}}}
 function addTripTimeline(card,status){const stages=[{key:"pendiente",label:"Pedido",icon:"1"},{key:"cotizado",label:"Tarifa",icon:"2"},{key:"en_camino",label:"En camino",icon:"3"},{key:"en_viaje",label:"En viaje",icon:"4"},{key:"finalizado",label:"Finalizado",icon:"5"}];let idx=stages.findIndex(x=>x.key===status);if(status==="aceptado")idx=1;if(status==="cancelado")return;const row=el("div","trip-steps");stages.forEach((x,i)=>{const d=el("div","trip-step"+(i<idx?" done":i===idx?" active":""));d.append(el("div","bubble",i<idx?"✓":x.icon),el("span",0,x.label));row.append(d)});card.append(row)}
 async function compartirViaje(r){const text="Mi viaje en GPTAXI\nEstado: "+(T[r.status]||r.status)+"\nRecogida: "+(r.pickup||"Punto en el mapa")+"\nDestino: "+(r.dropoff||"Destino en el mapa")+"\nChofer: "+(r.driver_name||"Por confirmar")+"\nApp: "+location.href;try{if(navigator.share)await navigator.share({title:"Mi viaje GPTAXI",text});else window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener,noreferrer")}catch(e){if(e.name!=="AbortError")alert("No se pudo compartir el viaje.")}}
 function renderC(){const r=ride,live=r&&LIVE.includes(r.status);
@@ -267,10 +374,180 @@ $("inst").onclick=async()=>{if(!ip)return;ip.prompt();await ip.userChoice;ip=nul
 addEventListener("appinstalled",()=>{$("inst").hidden=true});
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 
+
+/* ---------- EMPRESAS · GPS, MAPAS Y SOLICITUD EN 3 PASOS ---------- */
+let empresaPickupPoint=null,empresaDropoffPoint=null,empresaPickupMap=null,empresaDropoffMap=null;
+let empresaPickupMarker=null,empresaDropoffMarker=null,empresaMapMode="pickup",empresaParcelSize="";
+const empresaMapIcon=label=>L.divIcon({className:"moto",html:label,iconSize:[32,32],iconAnchor:[16,16]});
+function empresaInitMaps(){
+  if(!empresaPickupMap){
+    empresaPickupMap=L.map("empPickupMap").setView([-25.97,-54.57],14);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(empresaPickupMap);
+    empresaPickupMap.on("click",e=>empresaSetPoint("pickup",e.latlng));
+  }
+  if(!empresaDropoffMap){
+    empresaDropoffMap=L.map("empDropoffMap").setView([-25.97,-54.57],14);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(empresaDropoffMap);
+    empresaDropoffMap.on("click",e=>empresaSetPoint("dropoff",e.latlng));
+  }
+  setTimeout(()=>{empresaPickupMap.invalidateSize();empresaDropoffMap.invalidateSize()},120);
+}
+async function empresaReverse(ll){
+  try{
+    const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=17&accept-language=es&lat=${ll.lat}&lon=${ll.lng}`);
+    const j=await r.json(),a=j.address||{};
+    return [j.name,a.road,a.house_number,a.neighbourhood||a.suburb,a.city||a.town||a.village||a.municipality].filter(Boolean).filter((x,i,a)=>a.indexOf(x)===i).join(", ")||`${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`;
+  }catch(e){return `${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`}
+}
+async function empresaSetPoint(kind,ll){
+  const point={lat:ll.lat,lng:ll.lng};
+  const map=kind==="pickup"?empresaPickupMap:empresaDropoffMap;
+  if(kind==="pickup"){
+    empresaPickupPoint=point;
+    if(empresaPickupMarker)empresaPickupMarker.setLatLng(ll);else empresaPickupMarker=L.marker(ll,{icon:empresaMapIcon("📦")}).addTo(map);
+    $("empGpsStatus").textContent="Buscando dirección del punto de retiro…";
+  }else{
+    empresaDropoffPoint=point;
+    if(empresaDropoffMarker)empresaDropoffMarker.setLatLng(ll);else empresaDropoffMarker=L.marker(ll,{icon:empresaMapIcon("🏁")}).addTo(map);
+  }
+  const address=await empresaReverse(point);
+  if(kind==="pickup"){$("empPickup").value=address;$("empGpsStatus").textContent="✅ Punto de retiro marcado: "+address}
+  else $("empDropoff").value=address;
+}
+function empresaUseMap(kind){
+  empresaMapMode=kind;
+  empresaInitMaps();
+  const m=kind==="pickup"?empresaPickupMap:empresaDropoffMap;
+  setTimeout(()=>{m.invalidateSize();m.getContainer().scrollIntoView({behavior:"smooth",block:"center"})},100);
+}
+function empresaGPS(){
+  if(!navigator.geolocation){$("empGpsStatus").textContent="Este navegador no permite obtener GPS. Marcá el punto en el mapa.";return}
+  $("empGps").disabled=true;$("empGps").textContent="Buscando ubicación exacta…";
+  navigator.geolocation.getCurrentPosition(async p=>{
+    const ll={lat:p.coords.latitude,lng:p.coords.longitude};
+    empresaInitMaps();empresaPickupMap.setView(ll,17);await empresaSetPoint("pickup",ll);
+    $("empGps").disabled=false;$("empGps").textContent="📍 Usar mi ubicación exacta para el retiro";
+  },()=>{
+    $("empGpsStatus").textContent="No se pudo obtener GPS. Permití la ubicación del navegador o marcá el retiro en el mapa.";
+    $("empGps").disabled=false;$("empGps").textContent="📍 Intentar GPS nuevamente";
+  },{enableHighAccuracy:true,timeout:20000,maximumAge:0});
+}
+function empresaSelectParcel(btn){
+  empresaParcelSize=btn.dataset.size;
+  document.querySelectorAll(".parcel-option").forEach(b=>{b.classList.toggle("selected",b===btn);b.setAttribute("aria-pressed",b===btn?"true":"false")});
+}
+const EMP_FAVORITES_KEY="gptaxi_empresa_favorite_destinations_v1";
+function empresaGetFavorites(){try{return JSON.parse(store.get(EMP_FAVORITES_KEY)||"[]")}catch(e){return []}}
+function empresaRenderFavorites(){const box=$("empresaFavoriteList");if(!box)return;box.replaceChildren();const favs=empresaGetFavorites();if(!favs.length)return;favs.forEach((f,i)=>{const row=el("div","fav-item"),b=el("button","fav-pick","📍 "+f.name+(f.address&&f.address!==f.name?"\n"+f.address:""));b.onclick=async()=>{empresaInitMaps();empresaDropoffPoint={lat:f.lat,lng:f.lng};empresaDropoffMap.setView([f.lat,f.lng],16);await empresaSetPoint("dropoff",f);$("empDropoff").value=f.address||f.name;empresaDropoffMap.invalidateSize();empresaCloseFavorites();empresaNext(2)};row.append(b);const rm=el("button","remove-fav","✕");rm.setAttribute("aria-label","Eliminar destino favorito "+f.name);rm.onclick=()=>{if(!confirm("¿Eliminar el destino favorito "+f.name+"?"))return;const a=empresaGetFavorites();a.splice(i,1);store.set(EMP_FAVORITES_KEY,JSON.stringify(a));empresaRenderFavorites()};row.append(rm);box.append(row)})}
+function empresaOpenFavorites(){empresaRenderFavorites();$("empresaFavoritesModal").hidden=false;document.body.style.overflow="hidden"}
+function empresaCloseFavorites(){$("empresaFavoritesModal").hidden=true;document.body.style.overflow=""}
+function empresaSaveFavorite(){if(!empresaDropoffPoint){alert("Primero marcá el destino en el mapa.");return}const favs=empresaGetFavorites();if(favs.length>=12){alert("Podés guardar hasta 12 destinos. Eliminá uno para guardar otro.");return}const address=$("empDropoff").value.trim();const name=prompt("¿Cómo querés llamar a este destino?",address||"Mi destino");if(!name||!name.trim())return;favs.push({name:name.trim().slice(0,50),address,lat:empresaDropoffPoint.lat,lng:empresaDropoffPoint.lng});store.set(EMP_FAVORITES_KEY,JSON.stringify(favs));empresaRenderFavorites();alert("Destino guardado en favoritos de este celular.")}
+function empresaNext(step){
+  if(step===2){
+    if(!$("empSender").value.trim()){alert("Ingresá el nombre del negocio o cliente remitente.");$("empSender").focus();return}
+    if(!empresaPickupPoint && !$("empPickup").value.trim()){alert("Marcá la ubicación GPS o el punto de retiro en el mapa.");return}
+  }
+  if(step===3){
+    if(!empresaDropoffPoint){alert("Marcá el destino tocando el mapa.");return}
+    if(!$("empRecipient").value.trim()){alert("Ingresá el nombre del destinatario.");$("empRecipient").focus();return}
+    if(!$("empRecipientPhone").value.trim()){alert("Ingresá el teléfono del destinatario.");$("empRecipientPhone").focus();return}
+    if(!empresaParcelSize){alert("Elegí el tamaño o tipo de paquete.");return}
+    const fields=[
+      ["Remitente",$("empSender").value.trim()],["Teléfono remitente",$("empPhone").value.trim()||"No indicado"],
+      ["Retiro",$("empPickup").value.trim()],["Destinatario",$("empRecipient").value.trim()],
+      ["Teléfono destinatario",$("empRecipientPhone").value.trim()],["Entrega",$("empDropoff").value.trim()],
+      ["Paquete",empresaParcelSize]
+    ];
+    const box=$("empresaSummary");box.replaceChildren();
+    fields.forEach(([k,v])=>{const p=el("p");p.append(el("b",0,k+": "),document.createTextNode(v));box.append(p)});
+  }
+  for(let i=1;i<=3;i++)$("empresa-step"+i).hidden=i!==step;
+  for(let i=1;i<=3;i++)$("ep-"+i).classList.toggle("active",i===step);
+  if(step===1||step===2){empresaInitMaps();setTimeout(()=>{(step===1?empresaPickupMap:empresaDropoffMap).invalidateSize()},100)}
+  $("empresaError").textContent="";
+}
+async function solicitarEnvio(){
+  const btn=$("empresaSend"),err=$("empresaError");err.textContent="";
+  if(!navigator.onLine){err.textContent="Necesitás conexión a internet para solicitar el envío.";return}
+  if(!empresaPickupPoint||!empresaDropoffPoint){err.textContent="Falta marcar el retiro y el destino en el mapa.";return}
+  btn.disabled=true;btn.textContent="Enviando solicitud…";
+  try{
+    const sender=$("empSender").value.trim(),phone=$("empPhone").value.trim();
+    const recipient=$("empRecipient").value.trim(),recipientPhone=$("empRecipientPhone").value.trim();
+    const pickup=$("empPickup").value.trim(),dropoff=$("empDropoff").value.trim();
+    const row={
+      client_id:cid,client_name:sender+(phone?" · Tel. "+phone:""),
+      pickup_loc:pickup,dropoff_loc:dropoff,
+      pickup:"📦 EMPRESAS · RETIRO: "+pickup+" · REMITENTE: "+sender+" · TEL: "+(phone||"No indicado")+" · PAQUETE: "+empresaParcelSize,
+      dropoff:"📦 EMPRESAS · ENTREGA: "+dropoff+" · DESTINATARIO: "+recipient+" · TEL: "+recipientPhone,
+      pickup_lat:empresaPickupPoint.lat,pickup_lng:empresaPickupPoint.lng,pickup_exact:true,
+      dropoff_lat:empresaDropoffPoint.lat,dropoff_lng:empresaDropoffPoint.lng,
+      distance_km:Math.round(hav(empresaPickupPoint,empresaDropoffPoint)*1.3*10)/10
+    };
+    const {data,error}=await db.from("rides").insert(row).select().single();
+    if(error)throw error;
+    store.set("ride",JSON.stringify(data));ride=data;
+    $("empresaError").textContent="";
+    btn.disabled=true;btn.textContent="Solicitud enviada";
+    renderEmpresaStatus(data);
+    slackNotify(data,"pendiente");
+    renderC();
+  }catch(e){err.textContent="No se pudo enviar la solicitud: "+(e.message||"Error desconocido")+". Revisá la conexión e intentá nuevamente."}
+  finally{if(!ride||!String(ride.pickup||"").includes("EMPRESAS")){btn.disabled=false;btn.textContent="📦 Pedir mensajería"}}
+}
+let empresaTrackingMap=null,empresaTrackingDriverMarker=null,empresaTrackingPickupMarker=null,empresaTrackingDestMarker=null,empresaTrackingLine=null;
+let empresaDriverCache={};
+async function empresaGetDriverInfo(name){if(!name)return null;if(empresaDriverCache[name])return empresaDriverCache[name];try{const {data}=await db.from("drivers").select("*").eq("name",name).maybeSingle();if(data){empresaDriverCache[name]=data;return data}}catch(e){}return null}
+function empresaDriverCard(r,info){const box=el("div","company-driver");box.append(el("b",0,"🧑‍✈️ Datos del chofer"),el("p",0,"Nombre: "+(r.driver_name||"A confirmar")));const moto=(info&&(info.moto||info.vehicle||info.vehiculo||info.motorcycle))||motoOf[r.driver_name];if(moto)box.append(el("p",0,"Moto: "+moto));const plate=info&&(info.plate||info.patente||info.license_plate||info.moto_patente);if(plate)box.append(el("p",0,"Patente: "+plate));const phone=info&&(info.phone||info.telefono||info.phone_number||info.celular||info.whatsapp);if(phone){box.append(el("p",0,"Teléfono: "+phone));const wa=String(phone).replace(/\D/g,"");if(wa){const a=el("a",0,"Contactar al chofer por WhatsApp");a.href="https://wa.me/"+wa;a.target="_blank";a.rel="noopener noreferrer";box.append(a)}}const alias=(r.driver_alias)||(info&&(info.alias||info.payment_alias||info.cbu_alias));if(alias){const pay=el("div","company-alias-pay");pay.append(el("b",0,"💳 Alias para transferencia"));const row=el("div","company-alias-row"),field=el("input","company-alias-input");field.type="text";field.readOnly=true;field.value=String(alias);field.setAttribute("aria-label","Alias del chofer para copiar");row.append(field);const copy=el("button","company-alias-copy","📋 Copiar alias");copy.type="button";copy.onclick=async()=>{try{if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(String(alias))}else{field.focus();field.select();const ok=document.execCommand("copy");if(!ok)throw new Error("copy failed")}copy.textContent="✅ Alias copiado";setTimeout(()=>copy.textContent="📋 Copiar alias",2200)}catch(e){field.focus();field.select();copy.textContent="Seleccioná y copiá"}};row.append(copy);pay.append(row,el("small",0,"Tocá Copiar alias y pegalo en tu billetera o banco al hacer la transferencia."));box.append(pay)}box.append(el("p","hint","Los datos de contacto adicionales se muestran si están cargados en el perfil del chofer."));return box}
+function empresaUpdateTracking(r){const panel=$("empresaTrackingPanel");if(!panel)return;const active=["aceptado","en_camino","en_viaje"].includes(r.status)&&String(r.pickup||"").includes("EMPRESAS");panel.hidden=!active;if(!active)return;
+ const txt=$("empresaTrackingText");txt.textContent=r.status==="aceptado"?"✅ Tarifa aceptada. El chofer está asignado y se prepara para ir al retiro.":r.status==="en_camino"?"🏍️ El chofer va hacia el punto de retiro del paquete.": "📦 El paquete fue retirado y está viajando hacia el destinatario.";
+ if(!empresaTrackingMap){empresaTrackingMap=L.map("empresaTrackingMap").setView([r.pickup_lat||-25.97,r.pickup_lng||-54.57],14);L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:"© OpenStreetMap",maxZoom:19}).addTo(empresaTrackingMap)}
+ const point=(lat,lng)=>lat!=null&&lng!=null?[Number(lat),Number(lng)]:null;const pickup=point(r.pickup_lat,r.pickup_lng),dest=point(r.dropoff_lat,r.dropoff_lng),driver=point(r.driver_lat,r.driver_lng);
+ if(pickup){if(empresaTrackingPickupMarker)empresaTrackingPickupMarker.setLatLng(pickup);else empresaTrackingPickupMarker=L.marker(pickup,{icon:empresaMapIcon("📦")}).addTo(empresaTrackingMap)}
+ if(dest){if(empresaTrackingDestMarker)empresaTrackingDestMarker.setLatLng(dest);else empresaTrackingDestMarker=L.marker(dest,{icon:empresaMapIcon("🏁")}).addTo(empresaTrackingMap)}
+ if(driver){if(empresaTrackingDriverMarker)empresaTrackingDriverMarker.setLatLng(driver);else empresaTrackingDriverMarker=L.marker(driver,{icon:empresaMapIcon("🏍️")}).addTo(empresaTrackingMap);txt.textContent+=(r.status==="en_viaje"?" Ubicación actual del chofer/paquete actualizada.":" Ubicación actual del chofer actualizada.")}else txt.textContent+=" La posición exacta aparecerá cuando la aplicación del chofer comparta su GPS.";
+ const pts=[pickup,dest].filter(Boolean);if(pts.length===2){if(empresaTrackingLine)empresaTrackingLine.setLatLngs([pickup,dest]);else empresaTrackingLine=L.polyline([pickup,dest],{dashArray:"6 8"}).addTo(empresaTrackingMap)}
+ const bounds=[pickup,dest,driver].filter(Boolean);if(bounds.length)empresaTrackingMap.fitBounds(bounds,{padding:[24,24],maxZoom:16});setTimeout(()=>empresaTrackingMap.invalidateSize(),100);
+}
+async function renderEmpresaStatus(r){
+  const box=$("empresaLive");if(!box||!r||!String(r.pickup||"").includes("EMPRESAS"))return;
+  box.hidden=false;box.replaceChildren();
+  const title=el("h3",0,"📦 ESTADO DE TU ENVÍO");box.append(title);
+  const stageNames={pendiente:"BUSCANDO CHOFER",cotizado:"TARIFA RECIBIDA · REQUIERE TU CONFIRMACIÓN",aceptado:"CHOFER ASIGNADO",en_camino:"CHOFER YENDO A RETIRAR",en_viaje:"PAQUETE EN CAMINO AL DESTINO",finalizado:"ENTREGA CONFIRMADA",cancelado:"SOLICITUD CANCELADA"};
+  const statusText={pendiente:"Tu solicitud fue recibida. Estamos esperando que un chofer te envíe su tarifa.",cotizado:"Revisá el importe y elegí Aceptar tarifa o Rechazar tarifa para continuar.",aceptado:"El chofer está asignado. Prepará el paquete para el retiro.",en_camino:"El chofer se dirige al punto de retiro indicado.",en_viaje:"El paquete ya fue retirado y está viajando hacia el destinatario.",finalizado:"El chofer confirmó que el paquete fue entregado en destino.",cancelado:"Esta solicitud fue cancelada."};
+  const banner=el("div","company-status-banner "+(["finalizado"].includes(r.status)?"status-ok":["cotizado","pendiente"].includes(r.status)?"status-warn":["cancelado"].includes(r.status)?"status-stop":""));banner.append(el("b",0,stageNames[r.status]||String(r.status||"ESTADO DESCONOCIDO").toUpperCase()),el("span",0,statusText[r.status]||"Consultá esta pantalla para ver las actualizaciones del envío."));box.append(banner);
+  if(r.status==="pendiente")box.append(el("p","hint","Solicitud recibida. Estamos esperando que un chofer te envíe su tarifa."));
+  if(r.status==="cotizado"){
+    box.append(el("p",0,(r.driver_name||"Un chofer")+" te envió esta tarifa:"),el("span","quote-price",money(r.price||0)),el("p","hint","Aceptá la tarifa para confirmar el envío o rechazala para seguir buscando."));
+    const actions=el("div","quote-actions"),yes=el("button",0,"✅ Aceptar tarifa"),no=el("button","o","↩️ Rechazar tarifa");
+    yes.onclick=async()=>{yes.disabled=true;await upd({status:"aceptado",event_at:new Date().toISOString()},"cotizado");await refreshC()};
+    no.onclick=async()=>{no.disabled=true;await upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(r.tariff_rejected_by||[]),r.driver_name],event_at:new Date().toISOString()},"cotizado");await refreshC()};actions.append(yes,no);box.append(actions);
+  }
+  if(r.price!=null&&r.status!=="cotizado")box.append(el("b","quote-price","Tarifa: "+money(r.price)));
+  if(["aceptado","en_camino","en_viaje","finalizado"].includes(r.status)){
+    const info=await empresaGetDriverInfo(r.driver_name);box.append(empresaDriverCard(r,info));
+  }
+  if(r.status==="en_viaje")box.append(el("p","hint","Podés seguir la ubicación compartida por el chofer en el mapa de seguimiento."));
+  empresaUpdateTracking(r);
+  if(["finalizado","cancelado"].includes(r.status)){
+    const name=(r.client_name||"").split(" · Tel.")[0].trim()||$("empSender").value.trim()||"cliente";
+    const again=el("button","new-company-request","➕ Nueva solicitud para "+name);again.onclick=()=>{empresaReset();$("empSender").value=name;store.del("ride");ride=null;renderC();empresaNext(1);$("empresa-step1").scrollIntoView({behavior:"smooth",block:"start"})};box.append(again);
+  }
+}
+function empresaReset(){
+  for(const id of ["empSender","empPhone","empPickup","empDropoff","empItem","empRecipient","empRecipientPhone"])if($(id))$(id).value="";
+  empresaPickupPoint=null;empresaDropoffPoint=null;empresaParcelSize="";
+  if(empresaPickupMarker&&empresaPickupMap){empresaPickupMap.removeLayer(empresaPickupMarker);empresaPickupMarker=null}
+  if(empresaDropoffMarker&&empresaDropoffMap){empresaDropoffMap.removeLayer(empresaDropoffMarker);empresaDropoffMarker=null}
+  document.querySelectorAll(".parcel-option").forEach(b=>{b.classList.remove("selected");b.setAttribute("aria-pressed","false")});
+  $("empresaResult").replaceChildren();$("empresaLive").replaceChildren();$("empresaLive").hidden=true;$("empresaTrackingPanel").hidden=true;const sendBtn=$("empresaSend");if(sendBtn){sendBtn.disabled=false;sendBtn.textContent="📦 Pedir mensajería"}empresaNext(1);empresaRenderFavorites();
+}
+
 /* ---------- NAVEGACIÓN ---------- */
-const NAV={cli:["pedir","motos","msg"]};
-function vcli(v){for(const k of NAV.cli){$("cv-"+k).hidden=k!==v;$("nc-"+k).classList.toggle("on",k===v)}if(v==="pedir")setTimeout(()=>map.invalidateSize(),50);if(v==="motos")loadA()}
+const NAV={cli:["pedir","motos","msg","empresas"]};
+function vcli(v){for(const k of NAV.cli){$("cv-"+k).hidden=k!==v;$("nc-"+k).classList.toggle("on",k===v)}if(v==="pedir")setTimeout(()=>map.invalidateSize(),50);if(v==="motos")loadA();if(v==="empresas"){empresaRenderFavorites();if(ride&&String(ride.pickup||"").includes("EMPRESAS"))refreshC();setTimeout(()=>{if(empresaTrackingMap)empresaTrackingMap.invalidateSize()},120)}}
 /* ---------- TIEMPO REAL ---------- */
 db.channel("rides-cli").on("postgres_changes",{event:"*",schema:"public",table:"rides"},()=>{refreshC();loadA()}).subscribe();
-setInterval(()=>{refreshC();loadA()},4000);renderC();refreshC();loadA();
+setInterval(()=>{refreshC();loadA()},4000);renderC();refreshC();loadA();empresaRenderFavorites();
+if(new URLSearchParams(location.search).get("section")==="empresas")setTimeout(()=>vcli("empresas"),120);
 </script></body></html>
