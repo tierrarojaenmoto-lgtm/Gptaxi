@@ -170,6 +170,7 @@ const r=await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&z
 const a=(await r.json()).address||{};
 return [a.neighbourhood||a.suburb||a.quarter,a.city||a.town||a.village||a.municipality||a.hamlet||a.county].filter(Boolean).filter((x,i,arr)=>arr.indexOf(x)===i).join(", ")}catch(e){return ""}}
 try{ride=JSON.parse(store.get("ride"));$("n").value=store.get("nombre")||""}catch(e){}
+function slackNotify(r,status){try{if(!r||!r.id||!status)return;db.functions.invoke("slack-notify",{body:{ride_id:r.id,event:status}}).catch(()=>{})}catch(e){}}
 async function pedir(){$("e").textContent="";
 if(!pick||!dest)return $("e").textContent=pick?"Tocá en el mapa a dónde querés ir.":"Primero tocá el botón 📍 Enviar mi ubicación exacta.";
 $("go").disabled=true;$("go").textContent="Calculando distancia…";
@@ -178,8 +179,8 @@ const row={client_id:cid,client_name:n,pickup_loc:lp,dropoff_loc:ld,pickup:$("p"
 const {data,error}=await db.from("rides").insert(row).select().single();
 $("go").disabled=false;$("go").textContent="Pedir mototaxi";
 if(error)return $("e").textContent="No se pudo pedir: "+error.message;
-ride=data;store.set("ride",JSON.stringify(data));if(window.Notification&&Notification.permission==="granted")activarPush("cliente",1);store.set("nombre",n);renderC()}
-async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.id);if(onlyStatus)q=q.eq("status",onlyStatus);await q;refreshC()}
+ride=data;slackNotify(data,"pendiente");store.set("ride",JSON.stringify(data));if(window.Notification&&Notification.permission==="granted")activarPush("cliente",1);store.set("nombre",n);renderC()}
+async function upd(u,onlyStatus){let q=db.from("rides").update(u).eq("id",ride.id);if(onlyStatus)q=q.eq("status",onlyStatus);const {data:ud}=await q.select();if(u.status&&ud&&ud.length)slackNotify(ud[0],u.status);refreshC()}
 const aceptar=()=>upd({status:"aceptado"},"cotizado");
 const rechazar=()=>upd({status:"pendiente",driver_name:null,price:null,driver_alias:null,quoted_at:null,tariff_rejected_by:[...(ride.tariff_rejected_by||[]),ride.driver_name],event_at:new Date().toISOString()},"cotizado");
 const cancelar=()=>{if(["aceptado","en_camino"].includes(ride.status)&&!confirm("¿Cancelar el viaje? Se le avisa al chofer."))return;return upd({status:"cancelado",event_at:new Date().toISOString()})};
